@@ -1,6 +1,7 @@
 name: cesizen-api
 
 services:
+  # Lance le conteneur d'API Symfony
   api:
     build:
       context: .
@@ -25,6 +26,7 @@ services:
       - "8000:80"
     restart: unless-stopped
 
+  # Lance le conteneur de base de données MariaDB
   database:
     image: mariadb:11.4
     environment:
@@ -44,6 +46,18 @@ services:
       start_period: 20s
     restart: unless-stopped
 
+  # Lance le conteneur de phpMyAdmin après la BDD MariaDB pour gérer la base de données à partir d'une interface web (pas besoin de software extérieur)
+  phpmyadmin:
+    image: phpmyadmin:latest
+    environment:
+      PMA_HOST: database
+      PMA_USER: cesizen
+      PMA_PASSWORD: cesizen
+    ports:
+      - "8080:80"
+    depends_on:
+      - database
+    restart: unless-stopped
 
 volumes:
   mariadb_data:
