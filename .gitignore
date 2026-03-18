@@ -1,0 +1,40 @@
+
+### Symfony / Runtime
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/var/
+
+### Dependencies
+/vendor/
+
+### Composer
+/.composer/
+/composer.phar
+
+### PHPUnit / Coverage
+/.phpunit.cache/
+/phpunit.xml
+/build/
+/coverage/
+
+### Logs
+*.log
+
+### Docker / Local overrides
+/compose.override.yaml
+/docker-compose.override.yml
+/docker-compose.override.yaml
+
+### IDE / Editor
+/.idea/
+/.vscode/
+*.swp
+*.swo
+
+### OS
+.DS_Store
+Thumbs.db
+Desktop.ini

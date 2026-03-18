@@ -1,0 +1,10 @@
+.git
+.github
+.composer
+.phpunit.cache
+build
+var
+vendor
+tests
+README.md
+*.md
