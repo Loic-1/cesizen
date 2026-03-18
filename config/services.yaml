@@ -10,6 +10,10 @@ parameters:
     app.jwt_secret: '%env(JWT_SECRET)%'
     app.jwt_ttl: '%env(int:JWT_TTL)%'
     app.refresh_token_ttl: '%env(int:REFRESH_TOKEN_TTL)%'
+    app.refresh_token_cookie_name: '%env(REFRESH_TOKEN_COOKIE_NAME)%'
+    app.refresh_token_cookie_path: '%env(REFRESH_TOKEN_COOKIE_PATH)%'
+    app.refresh_token_cookie_same_site: '%env(REFRESH_TOKEN_COOKIE_SAMESITE)%'
+    app.refresh_token_cookie_secure: '%env(bool:REFRESH_TOKEN_COOKIE_SECURE)%'
 
 services:
     # default configuration for services in *this* file
@@ -30,6 +34,13 @@ services:
     App\Service\RefreshTokenManager:
         arguments:
             $refreshTokenTtl: '%app.refresh_token_ttl%'
+
+    App\Service\RefreshTokenCookieManager:
+        arguments:
+            $cookieName: '%app.refresh_token_cookie_name%'
+            $cookiePath: '%app.refresh_token_cookie_path%'
+            $sameSite: '%app.refresh_token_cookie_same_site%'
+            $secure: '%app.refresh_token_cookie_secure%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

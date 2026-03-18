@@ -17,6 +17,10 @@ class RefreshTokenRepository extends ServiceEntityRepository
         parent::__construct($registry, RefreshToken::class);
     }
 
+    /**
+     * Retrouve un token actif par son hash.
+     * @return RefreshToken|null
+     */
     public function findActiveByHash(string $tokenHash, \DateTimeImmutable $now): ?RefreshToken
     {
         return $this->createQueryBuilder('rt')
@@ -29,6 +33,10 @@ class RefreshTokenRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
+    /**
+     * Révoque tous les tokens actifs pour un utilisateur donné.
+     * @return int
+     */
     public function revokeActiveForUser(User $user, \DateTimeImmutable $now): int
     {
         return $this->getEntityManager()->createQueryBuilder()

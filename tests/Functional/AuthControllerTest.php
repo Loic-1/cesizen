@@ -18,8 +18,12 @@ class AuthControllerTest extends ApiTestCase
         $data = $this->responseData();
 
         self::assertArrayHasKey('accessToken', $data);
-        self::assertArrayHasKey('refreshToken', $data);
+        self::assertArrayNotHasKey('refreshToken', $data);
         self::assertSame('new.user@example.com', $data['user']['email']);
+        self::assertNotNull($this->responseCookie());
+        self::assertTrue($this->responseCookie()?->isHttpOnly() ?? false);
+        self::assertSame('/auth/refresh-token', $this->responseCookie()?->getPath());
+        self::assertNotNull($this->browserCookieValue());
     }
 
     public function testRegisterRejectsDuplicateEmail(): void
@@ -48,8 +52,12 @@ class AuthControllerTest extends ApiTestCase
         $data = $this->responseData();
 
         self::assertArrayHasKey('accessToken', $data);
-        self::assertArrayHasKey('refreshToken', $data);
+        self::assertArrayNotHasKey('refreshToken', $data);
         self::assertSame('login@example.com', $data['user']['email']);
+        self::assertNotNull($this->responseCookie());
+        self::assertTrue($this->responseCookie()?->isHttpOnly() ?? false);
+        self::assertSame('/auth/refresh-token', $this->responseCookie()?->getPath());
+        self::assertNotNull($this->browserCookieValue());
     }
 
     public function testLoginRejectsInvalidCredentials(): void
@@ -65,29 +73,62 @@ class AuthControllerTest extends ApiTestCase
         self::assertSame('Invalid credentials.', $this->responseData()['message']);
     }
 
-    public function testRefreshTokenRotatesToken(): void
+    public function testRefreshTokenUsesCookieAndRotatesToken(): void
     {
-        $user = $this->createUser('refresh@example.com', 'password123');
+        $this->createUser('refresh@example.com', 'password123');
 
         $this->jsonRequest('POST', '/auth/login', [
             'email' => 'refresh@example.com',
             'password' => 'password123',
         ]);
-        $loginData = $this->responseData();
+        $firstRefreshToken = $this->browserCookieValue();
+        self::assertNotNull($firstRefreshToken);
 
-        $this->jsonRequest('POST', '/auth/refresh-token', [
-            'refreshToken' => $loginData['refreshToken'],
-        ], $this->authHeaderFor($user));
+        $this->jsonRequest('POST', '/auth/refresh-token');
 
         self::assertResponseIsSuccessful();
         $data = $this->responseData();
+        $rotatedRefreshToken = $this->browserCookieValue();
 
-        self::assertNotSame($loginData['refreshToken'], $data['refreshToken']);
+        self::assertNotSame($firstRefreshToken, $rotatedRefreshToken);
         self::assertArrayHasKey('accessToken', $data);
+        self::assertArrayNotHasKey('refreshToken', $data);
         self::assertSame('refresh@example.com', $data['user']['email']);
     }
 
-    public function testLogoutRevokesRefreshToken(): void
+    public function testRefreshTokenRejectsMissingCookie(): void
+    {
+        $this->jsonRequest('POST', '/auth/refresh-token');
+
+        self::assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
+        self::assertSame('Missing refresh token cookie.', $this->responseData()['message']);
+    }
+
+    public function testRotatedRefreshTokenCannotBeReused(): void
+    {
+        $this->createUser('rotate@example.com', 'password123');
+
+        $this->jsonRequest('POST', '/auth/login', [
+            'email' => 'rotate@example.com',
+            'password' => 'password123',
+        ]);
+        $firstRefreshToken = $this->browserCookieValue();
+        self::assertNotNull($firstRefreshToken);
+
+        $this->jsonRequest('POST', '/auth/refresh-token');
+        self::assertResponseIsSuccessful();
+        $secondRefreshToken = $this->browserCookieValue();
+        self::assertNotNull($secondRefreshToken);
+        self::assertNotSame($firstRefreshToken, $secondRefreshToken);
+
+        $this->setBrowserCookie('refresh_token', $firstRefreshToken);
+        $this->jsonRequest('POST', '/auth/refresh-token');
+
+        self::assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
+        self::assertSame('Invalid refresh token.', $this->responseData()['message']);
+    }
+
+    public function testLogoutRevokesUserRefreshTokensAndClearsCookie(): void
     {
         $user = $this->createUser('logout@example.com', 'password123');
 
@@ -95,17 +136,17 @@ class AuthControllerTest extends ApiTestCase
             'email' => 'logout@example.com',
             'password' => 'password123',
         ]);
-        $loginData = $this->responseData();
+        $refreshToken = $this->browserCookieValue();
+        self::assertNotNull($refreshToken);
 
-        $this->jsonRequest('POST', '/auth/logout', [
-            'refreshToken' => $loginData['refreshToken'],
-        ], $this->authHeaderFor($user));
+        $this->jsonRequest('POST', '/auth/logout', [], $this->authHeaderFor($user));
 
         self::assertResponseStatusCodeSame(Response::HTTP_NO_CONTENT);
+        self::assertSame('', $this->browserCookieValue() ?? '');
 
         $repository = static::getContainer()->get(RefreshTokenRepository::class);
         self::assertNull($repository->findActiveByHash(
-            hash('sha256', $loginData['refreshToken']),
+            hash('sha256', $refreshToken),
             new \DateTimeImmutable()
         ));
     }

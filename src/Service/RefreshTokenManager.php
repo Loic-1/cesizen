@@ -17,29 +17,30 @@ class RefreshTokenManager
     ) {
     }
 
-    public function create(User $user): string
+    public function create(User $user): IssuedRefreshToken
     {
         // trouvé sur stackoverflow 😎
         $plainToken = bin2hex(random_bytes(64));
+        $expiresAt = new \DateTimeImmutable(sprintf('+%d seconds', $this->refreshTokenTtl));
         $refreshToken = (new RefreshToken())
             ->setUser($user)
             ->setTokenHash($this->hash($plainToken))
-            ->setExpiresAt(new \DateTimeImmutable(sprintf('+%d seconds', $this->refreshTokenTtl)));
+            ->setExpiresAt($expiresAt);
 
         $this->entityManager->persist($refreshToken);
         $this->entityManager->flush();
 
-        return $plainToken;
+        return new IssuedRefreshToken($plainToken, $expiresAt);
     }
 
-    public function rotate(string $plainToken): string
+    public function rotate(string $plainToken): IssuedRefreshToken
     {
         $refreshToken = $this->getValidToken($plainToken);
         $refreshToken->revoke();
-        $newPlainToken = $this->create($refreshToken->getUser());
+        $newRefreshToken = $this->create($refreshToken->getUser());
         $this->entityManager->flush();
 
-        return $newPlainToken;
+        return $newRefreshToken;
     }
 
     public function revoke(string $plainToken): void

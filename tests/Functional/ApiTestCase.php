@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Security\JwtTokenManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
+use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -114,6 +115,27 @@ abstract class ApiTestCase extends WebTestCase
         return [
             'HTTP_AUTHORIZATION' => 'Bearer '.$tokenManager->create($user),
         ];
+    }
+
+    protected function responseCookie(string $name = 'refresh_token'): ?\Symfony\Component\HttpFoundation\Cookie
+    {
+        foreach ($this->client->getResponse()->headers->getCookies() as $cookie) {
+            if ($cookie->getName() === $name) {
+                return $cookie;
+            }
+        }
+
+        return null;
+    }
+
+    protected function browserCookieValue(string $name = 'refresh_token', string $path = '/auth/refresh-token'): ?string
+    {
+        return $this->client->getCookieJar()->get($name, $path)?->getValue();
+    }
+
+    protected function setBrowserCookie(string $name, string $value, string $path = '/auth/refresh-token'): void
+    {
+        $this->client->getCookieJar()->set(new Cookie($name, $value, null, $path));
     }
 
     /**

@@ -20,37 +20,60 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_USER')]
 class MeController extends AbstractController
 {
+    /**
+     * Constructeur de la classe avec promotion de propriétés pour les services nécessaires.
+     * @param RequestPayloadResolver $payloadResolver
+     * @param UserRepository $userRepository
+     * @param UserPasswordHasherInterface $passwordHasher
+     * @param EntityManagerInterface $entityManager
+     */
     public function __construct(
         private readonly RequestPayloadResolver $payloadResolver,
         private readonly UserRepository $userRepository,
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly EntityManagerInterface $entityManager,
-    ) {
+    )
+    {
     }
 
+    /**
+     * Affiche les informations de l'utilisateur connecté.
+     * @param User|null $user
+     * @return JsonResponse
+     */
     #[Route('/users/me', name: 'users_me_get', methods: ['GET'])]
     public function show(#[CurrentUser] ?User $user): JsonResponse
     {
-        if ($user === null) {
+        if ($user === null)
+        {
             return $this->json(['message' => 'Authentication required.'], Response::HTTP_UNAUTHORIZED);
         }
 
         return $this->json($user, Response::HTTP_OK, [], ['groups' => ['user:read']]);
     }
 
+    /**
+     * Met à jour les informations de l'utilisateur connecté.
+     * @param Request $request
+     * @param User|null $user
+     * @return JsonResponse
+     */
     #[Route('/users/me', name: 'users_me_patch', methods: ['PATCH'])]
     public function update(Request $request, #[CurrentUser] ?User $user): JsonResponse
     {
-        if ($user === null) {
+        if ($user === null)
+        {
             return $this->json(['message' => 'Authentication required.'], Response::HTTP_UNAUTHORIZED);
         }
 
         /** @var UpdateMeInput $input */
         $input = $this->payloadResolver->resolve($request, UpdateMeInput::class);
 
-        if ($input->email !== null && $input->email !== $user->getEmail()) {
+        if ($input->email !== null && $input->email !== $user->getEmail())
+        {
             $existing = $this->userRepository->findOneByEmail($input->email);
-            if ($existing !== null && $existing->getId() != $user->getId()) {
+            if ($existing !== null && $existing->getId() != $user->getId())
+            {
                 return $this->json(['message' => 'Email already in use.'], Response::HTTP_CONFLICT);
             }
 
@@ -62,17 +85,25 @@ class MeController extends AbstractController
         return $this->json($user, Response::HTTP_OK, [], ['groups' => ['user:read']]);
     }
 
+    /**
+     * Modifie le mot de passe de l'utilisateur connecté.
+     * @param Request $request
+     * @param User|null $user
+     * @return JsonResponse
+     */
     #[Route('/users/me/password', name: 'users_me_password', methods: ['PATCH'])]
     public function changePassword(Request $request, #[CurrentUser] ?User $user): JsonResponse
     {
-        if ($user === null) {
+        if ($user === null)
+        {
             return $this->json(['message' => 'Authentication required.'], Response::HTTP_UNAUTHORIZED);
         }
 
         /** @var ChangePasswordInput $input */
         $input = $this->payloadResolver->resolve($request, ChangePasswordInput::class);
 
-        if (!$this->passwordHasher->isPasswordValid($user, (string) $input->currentPassword)) {
+        if (!$this->passwordHasher->isPasswordValid($user, (string) $input->currentPassword))
+        {
             return $this->json(['message' => 'Current password is invalid.'], Response::HTTP_BAD_REQUEST);
         }
 
@@ -82,10 +113,16 @@ class MeController extends AbstractController
         return $this->json(['message' => 'Password updated.']);
     }
 
+    /**
+     * Supprime le compte de l'utilisateur connecté.
+     * @param User|null $user
+     * @return JsonResponse
+     */
     #[Route('/users/me', name: 'users_me_delete', methods: ['DELETE'])]
     public function delete(#[CurrentUser] ?User $user): JsonResponse
     {
-        if ($user === null) {
+        if ($user === null)
+        {
             return $this->json(['message' => 'Authentication required.'], Response::HTTP_UNAUTHORIZED);
         }
 

@@ -18,7 +18,8 @@ class FileRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return list<File>
+     * Retouve tous les fichiers d'un article donné, triés par date de création décroissante.
+     * @return File[]
      */
     public function findByArticleId(Uuid $articleId): array
     {

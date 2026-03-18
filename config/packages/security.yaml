@@ -20,9 +20,11 @@ security:
                 - App\Security\JwtAuthenticator
             entry_point: App\Security\JwtAuthenticator
 
+    # Gestion des autoridations d'accès aux différentes routes de l'API
     access_control:
         - { path: ^/auth/(register|login)$, roles: PUBLIC_ACCESS }
-        - { path: ^/auth/(refresh-token|logout)$, roles: ROLE_USER }
+        - { path: ^/auth/refresh-token$, roles: PUBLIC_ACCESS }
+        - { path: ^/auth/logout$, roles: ROLE_USER }
         - { path: ^/users/me, roles: ROLE_USER }
         - { path: ^/admin, roles: ROLE_ADMIN }
 
