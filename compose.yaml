@@ -1,6 +1,7 @@
 name: cesizen-api
 
 services:
+  # Lance le conteneur d'API Symfony
   api:
     build:
       context: .
@@ -8,6 +9,8 @@ services:
     depends_on:
       database:
         condition: service_healthy
+      mailpit:
+        condition: service_started
     environment:
       APP_ENV: dev
       APP_DEBUG: 1
@@ -21,10 +24,14 @@ services:
       JWT_SECRET: docker-jwt-secret
       JWT_TTL: 3600
       REFRESH_TOKEN_TTL: 2592000
+      MAILER_FROM_EMAIL: no-reply@cesizen.local
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
     ports:
       - "8000:80"
     restart: unless-stopped
 
+  # Lance le conteneur de base de données MariaDB
   database:
     image: mariadb:11.4
     environment:
@@ -44,6 +51,24 @@ services:
       start_period: 20s
     restart: unless-stopped
 
+  # Lance le conteneur de phpMyAdmin après la BDD MariaDB pour gérer la base de données à partir d'une interface web (pas besoin de software extérieur)
+  phpmyadmin:
+    image: phpmyadmin:latest
+    environment:
+      PMA_HOST: database
+      PMA_USER: cesizen
+      PMA_PASSWORD: cesizen
+    ports:
+      - "8080:80"
+    depends_on:
+      - database
+    restart: unless-stopped
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "8025:8025"
+    restart: unless-stopped
 
 volumes:
   mariadb_data:

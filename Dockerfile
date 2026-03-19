@@ -16,7 +16,7 @@ FROM php:8.3-apache
 WORKDIR /var/www/html
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends libzip-dev unzip \
+    && apt-get install -y --no-install-recommends libzip-dev msmtp-mta unzip \
     && docker-php-ext-install pdo_mysql \
     && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*

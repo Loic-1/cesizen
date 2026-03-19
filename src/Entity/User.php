@@ -91,12 +91,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: RefreshToken::class, orphanRemoval: true)]
     private Collection $refreshTokens;
 
+    /**
+     * @var Collection<int, EmailVerificationToken>
+     */
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: EmailVerificationToken::class, orphanRemoval: true)]
+    private Collection $emailVerificationTokens;
+
     public function __construct()
     {
         $this->id = Uuid::v7();
         $this->createdAt = new \DateTimeImmutable();
         $this->articles = new ArrayCollection();
         $this->refreshTokens = new ArrayCollection();
+        $this->emailVerificationTokens = new ArrayCollection();
     }
 
     #[ORM\PrePersist]
@@ -200,6 +207,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getRefreshTokens(): Collection
     {
         return $this->refreshTokens;
+    }
+
+    /**
+     * @return Collection<int, EmailVerificationToken>
+     */
+    public function getEmailVerificationTokens(): Collection
+    {
+        return $this->emailVerificationTokens;
     }
 
     public function eraseCredentials(): void

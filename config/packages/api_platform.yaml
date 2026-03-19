@@ -1,6 +1,10 @@
 api_platform:
     title: Bookshop API
     version: 1.0.0
+    enable_docs: false
+    enable_swagger: false
+    enable_swagger_ui: false
+    enable_re_doc: false
     formats:
         json:
             mime_types:

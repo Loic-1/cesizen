@@ -22,7 +22,7 @@ security:
 
     # Gestion des autoridations d'accès aux différentes routes de l'API
     access_control:
-        - { path: ^/auth/(register|login)$, roles: PUBLIC_ACCESS }
+        - { path: ^/auth/(register|login|verify-email|resend-verification-email)$, roles: PUBLIC_ACCESS }
         - { path: ^/auth/refresh-token$, roles: PUBLIC_ACCESS }
         - { path: ^/auth/logout$, roles: ROLE_USER }
         - { path: ^/users/me, roles: ROLE_USER }
