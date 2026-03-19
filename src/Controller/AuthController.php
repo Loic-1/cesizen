@@ -4,21 +4,26 @@ namespace App\Controller;
 
 use App\Dto\Auth\LoginInput;
 use App\Dto\Auth\RegisterInput;
+use App\Dto\Auth\ResendVerificationEmailInput;
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Service\EmailVerificationManager;
 use App\Security\JwtTokenManager;
 use App\Service\IssuedRefreshToken;
 use App\Service\RefreshTokenCookieManager;
 use App\Service\RefreshTokenManager;
 use App\Service\RequestPayloadResolver;
+use App\Service\VerificationEmailSender;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Uid\Uuid;
 
@@ -38,13 +43,15 @@ class AuthController extends AbstractController
         private readonly JwtTokenManager $jwtTokenManager,
         private readonly RefreshTokenManager $refreshTokenManager,
         private readonly RefreshTokenCookieManager $refreshTokenCookieManager,
+        private readonly EmailVerificationManager $emailVerificationManager,
+        private readonly VerificationEmailSender $verificationEmailSender,
         private readonly EntityManagerInterface $entityManager,
     )
     {
     }
 
     /**
-     * Enregistrement d'un nouvel utilisateur et renvoi des tokens d'authentification.
+     * Enregistrement d'un nouvel utilisateur puis envoi d'un e-mail de validation.
      * @param Request $request
      * @return JsonResponse
      */
@@ -67,7 +74,12 @@ class AuthController extends AbstractController
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
-        return $this->buildAuthResponse($user, Response::HTTP_CREATED);
+        $this->sendVerificationEmail($user);
+
+        return $this->json([
+            'message' => 'Registration successful. Please verify your email address.',
+            'user' => $user,
+        ], Response::HTTP_CREATED, [], ['groups' => ['user:read']]);
     }
 
     /**
@@ -87,7 +99,53 @@ class AuthController extends AbstractController
             return $this->json(['message' => 'Invalid credentials.'], Response::HTTP_UNAUTHORIZED);
         }
 
+        if (!$user->isVerified())
+        {
+            return $this->json([
+                'message' => 'Please verify your email address before logging in.',
+            ], Response::HTTP_FORBIDDEN);
+        }
+
         return $this->buildAuthResponse($user);
+    }
+
+    #[Route('/auth/verify-email', name: 'auth_verify_email', methods: ['GET'])]
+    public function verifyEmail(Request $request): JsonResponse
+    {
+        $token = (string) $request->query->get('token', '');
+        if ($token === '') {
+            return $this->json(['message' => 'Missing verification token.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        try
+        {
+            $user = $this->emailVerificationManager->verify($token);
+        }
+        catch (BadRequestHttpException $exception)
+        {
+            return $this->json(['message' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+
+        return $this->json([
+            'message' => 'Email verified.',
+            'user' => $user,
+        ], Response::HTTP_OK, [], ['groups' => ['user:read']]);
+    }
+
+    #[Route('/auth/resend-verification-email', name: 'auth_resend_verification_email', methods: ['POST'])]
+    public function resendVerificationEmail(Request $request): JsonResponse
+    {
+        /** @var ResendVerificationEmailInput $input */
+        $input = $this->payloadResolver->resolve($request, ResendVerificationEmailInput::class);
+
+        $user = $this->userRepository->findOneByEmail((string) $input->email);
+        if ($user !== null && !$user->isVerified()) {
+            $this->sendVerificationEmail($user);
+        }
+
+        return $this->json([
+            'message' => 'If the account exists and is not yet verified, a verification email has been sent.',
+        ]);
     }
 
     /**
@@ -190,5 +248,15 @@ class AuthController extends AbstractController
         );
 
         return $response;
+    }
+
+    private function sendVerificationEmail(User $user): void
+    {
+        $verificationToken = $this->emailVerificationManager->create($user);
+        $verificationUrl = $this->generateUrl('auth_verify_email', [
+            'token' => $verificationToken->plainToken,
+        ], UrlGeneratorInterface::ABSOLUTE_URL);
+
+        $this->verificationEmailSender->send($user, $verificationUrl);
     }
 }

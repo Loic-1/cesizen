@@ -24,6 +24,18 @@ until php -r '
     sleep 2
 done
 
+echo "Configuring local mail delivery..."
+cat > /etc/msmtprc <<EOF
+defaults
+tls off
+auth off
+account default
+host ${SMTP_HOST:-mailpit}
+port ${SMTP_PORT:-1025}
+from ${MAILER_FROM_EMAIL:-no-reply@cesizen.local}
+EOF
+chmod 644 /etc/msmtprc
+
 echo "Running database migrations..."
 php bin/console doctrine:migrations:migrate --no-interaction
 

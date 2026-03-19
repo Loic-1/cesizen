@@ -6,7 +6,9 @@ use App\Dto\User\ChangePasswordInput;
 use App\Dto\User\UpdateMeInput;
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Service\EmailVerificationManager;
 use App\Service\RequestPayloadResolver;
+use App\Service\VerificationEmailSender;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -14,6 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -31,6 +34,8 @@ class MeController extends AbstractController
         private readonly RequestPayloadResolver $payloadResolver,
         private readonly UserRepository $userRepository,
         private readonly UserPasswordHasherInterface $passwordHasher,
+        private readonly EmailVerificationManager $emailVerificationManager,
+        private readonly VerificationEmailSender $verificationEmailSender,
         private readonly EntityManagerInterface $entityManager,
     )
     {
@@ -77,7 +82,8 @@ class MeController extends AbstractController
                 return $this->json(['message' => 'Email already in use.'], Response::HTTP_CONFLICT);
             }
 
-            $user->setEmail($input->email);
+            $user->setEmail($input->email)->setIsVerified(false);
+            $this->sendVerificationEmail($user);
         }
 
         $this->entityManager->flush();
@@ -130,5 +136,15 @@ class MeController extends AbstractController
         $this->entityManager->flush();
 
         return $this->json(null, Response::HTTP_NO_CONTENT);
+    }
+
+    private function sendVerificationEmail(User $user): void
+    {
+        $verificationToken = $this->emailVerificationManager->create($user);
+        $verificationUrl = $this->generateUrl('auth_verify_email', [
+            'token' => $verificationToken->plainToken,
+        ], UrlGeneratorInterface::ABSOLUTE_URL);
+
+        $this->verificationEmailSender->send($user, $verificationUrl);
     }
 }
