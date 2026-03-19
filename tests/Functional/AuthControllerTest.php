@@ -2,12 +2,14 @@
 
 namespace App\Tests\Functional;
 
+use App\Repository\UserRepository;
 use App\Repository\RefreshTokenRepository;
+use App\Service\VerificationEmailSender;
 use Symfony\Component\HttpFoundation\Response;
 
 class AuthControllerTest extends ApiTestCase
 {
-    public function testRegisterCreatesUserAndTokens(): void
+    public function testRegisterCreatesUserAndSendsVerificationEmail(): void
     {
         $this->jsonRequest('POST', '/auth/register', [
             'email' => 'new.user@example.com',
@@ -17,13 +19,19 @@ class AuthControllerTest extends ApiTestCase
         self::assertResponseStatusCodeSame(Response::HTTP_CREATED);
         $data = $this->responseData();
 
-        self::assertArrayHasKey('accessToken', $data);
-        self::assertArrayNotHasKey('refreshToken', $data);
+        self::assertSame('Registration successful. Please verify your email address.', $data['message']);
         self::assertSame('new.user@example.com', $data['user']['email']);
-        self::assertNotNull($this->responseCookie());
-        self::assertTrue($this->responseCookie()?->isHttpOnly() ?? false);
-        self::assertSame('/auth/refresh-token', $this->responseCookie()?->getPath());
-        self::assertNotNull($this->browserCookieValue());
+        self::assertNull($this->responseCookie());
+        self::assertNull($this->browserCookieValue());
+
+        $user = static::getContainer()->get(UserRepository::class)->findOneByEmail('new.user@example.com');
+        self::assertNotNull($user);
+        self::assertFalse($user->isVerified());
+
+        $sentEmails = static::getContainer()->get(VerificationEmailSender::class)->sentEmails();
+        self::assertCount(1, $sentEmails);
+        self::assertSame('new.user@example.com', $sentEmails[0]['to']);
+        self::assertStringContainsString('/auth/verify-email?token=', $sentEmails[0]['verificationUrl']);
     }
 
     public function testRegisterRejectsDuplicateEmail(): void
@@ -58,6 +66,19 @@ class AuthControllerTest extends ApiTestCase
         self::assertTrue($this->responseCookie()?->isHttpOnly() ?? false);
         self::assertSame('/auth/refresh-token', $this->responseCookie()?->getPath());
         self::assertNotNull($this->browserCookieValue());
+    }
+
+    public function testLoginRejectsUnverifiedUsers(): void
+    {
+        $this->createUser('pending@example.com', 'password123', ['ROLE_USER'], false);
+
+        $this->jsonRequest('POST', '/auth/login', [
+            'email' => 'pending@example.com',
+            'password' => 'password123',
+        ]);
+
+        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
+        self::assertSame('Please verify your email address before logging in.', $this->responseData()['message']);
     }
 
     public function testLoginRejectsInvalidCredentials(): void
@@ -198,5 +219,53 @@ class AuthControllerTest extends ApiTestCase
 
         self::assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
         self::assertSame('User not found.', $this->responseData()['message']);
+    }
+
+    public function testVerifyEmailMarksUserAsVerified(): void
+    {
+        $this->jsonRequest('POST', '/auth/register', [
+            'email' => 'verify.me@example.com',
+            'password' => 'password123',
+        ]);
+
+        $sentEmails = static::getContainer()->get(VerificationEmailSender::class)->sentEmails();
+        self::assertCount(1, $sentEmails);
+
+        $query = parse_url($sentEmails[0]['verificationUrl'], PHP_URL_QUERY);
+        parse_str(is_string($query) ? $query : '', $params);
+
+        $this->client->request(
+            'GET',
+            '/auth/verify-email',
+            ['token' => $params['token'] ?? null],
+            [],
+            ['HTTP_ACCEPT' => 'application/json']
+        );
+
+        self::assertResponseIsSuccessful();
+        self::assertSame('Email verified.', $this->responseData()['message']);
+
+        $user = static::getContainer()->get(UserRepository::class)->findOneByEmail('verify.me@example.com');
+        self::assertNotNull($user);
+        self::assertTrue($user->isVerified());
+    }
+
+    public function testResendVerificationEmailIssuesANewVerificationLink(): void
+    {
+        $this->createUser('pending@example.com', 'password123', ['ROLE_USER'], false);
+
+        $this->jsonRequest('POST', '/auth/resend-verification-email', [
+            'email' => 'pending@example.com',
+        ]);
+
+        self::assertResponseIsSuccessful();
+        self::assertSame(
+            'If the account exists and is not yet verified, a verification email has been sent.',
+            $this->responseData()['message']
+        );
+
+        $sentEmails = static::getContainer()->get(VerificationEmailSender::class)->sentEmails();
+        self::assertCount(1, $sentEmails);
+        self::assertSame('pending@example.com', $sentEmails[0]['to']);
     }
 }

@@ -1,4 +1,6 @@
 {
+    "name": "cesizen/api",
+    "description": "Backend API for the Cesizen application.",
     "type": "project",
     "license": "proprietary",
     "minimum-stability": "stable",

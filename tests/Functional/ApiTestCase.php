@@ -55,11 +55,13 @@ abstract class ApiTestCase extends WebTestCase
     protected function createUser(
         string $email = 'user@example.com',
         string $password = 'password123',
-        array $roles = ['ROLE_USER']
+        array $roles = ['ROLE_USER'],
+        bool $isVerified = true,
     ): User {
         $user = (new User())
             ->setEmail($email)
-            ->setRoles($roles);
+            ->setRoles($roles)
+            ->setIsVerified($isVerified);
 
         $hasher = static::getContainer()->get(UserPasswordHasherInterface::class);
         $user->setPassword($hasher->hashPassword($user, $password));

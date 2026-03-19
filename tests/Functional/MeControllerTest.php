@@ -3,6 +3,7 @@
 namespace App\Tests\Functional;
 
 use App\Repository\UserRepository;
+use App\Service\VerificationEmailSender;
 use Symfony\Component\HttpFoundation\Response;
 
 class MeControllerTest extends ApiTestCase
@@ -45,6 +46,14 @@ class MeControllerTest extends ApiTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSame('updated@example.com', $this->responseData()['email']);
+
+        $reloadedUser = static::getContainer()->get(UserRepository::class)->findOneByEmail('updated@example.com');
+        self::assertNotNull($reloadedUser);
+        self::assertFalse($reloadedUser->isVerified());
+
+        $sentEmails = static::getContainer()->get(VerificationEmailSender::class)->sentEmails();
+        self::assertCount(1, $sentEmails);
+        self::assertSame('updated@example.com', $sentEmails[0]['to']);
     }
 
     public function testUpdateRejectsDuplicateEmail(): void
