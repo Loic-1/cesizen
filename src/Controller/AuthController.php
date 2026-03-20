@@ -68,6 +68,7 @@ class AuthController extends AbstractController
 
         $user = (new User())
             ->setEmail((string) $input->email)
+            // Au moins le rôle d'utilisateur
             ->setRoles(['ROLE_USER']);
         $user->setPassword($this->passwordHasher->hashPassword($user, (string) $input->password));
 
@@ -166,12 +167,25 @@ class AuthController extends AbstractController
         {
             $refreshToken = $this->refreshTokenManager->getValidToken($plainRefreshToken);
             $user = $refreshToken->getUser();
-            $newRefreshToken = $this->refreshTokenManager->rotate($plainRefreshToken);
         }
         catch (UnauthorizedHttpException $exception)
         {
             return $this->json(['message' => $exception->getMessage()], Response::HTTP_UNAUTHORIZED);
         }
+
+        if (!$user->isVerified())
+        {
+            $this->refreshTokenManager->revokeAllForUser($user);
+
+            $response = $this->json([
+                'message' => 'Please verify your email address before accessing this resource.',
+            ], Response::HTTP_FORBIDDEN);
+            $response->headers->setCookie($this->refreshTokenCookieManager->clearCookie());
+
+            return $response;
+        }
+
+        $newRefreshToken = $this->refreshTokenManager->rotate($plainRefreshToken);
 
         return $this->withRefreshCookie($this->json([
             'accessToken' => $this->jwtTokenManager->create($user),

@@ -56,6 +56,35 @@ class MeControllerTest extends ApiTestCase
         self::assertSame('updated@example.com', $sentEmails[0]['to']);
     }
 
+    public function testVerifiedEndpointsRejectUsersWhoBecomeUnverified(): void
+    {
+        $user = $this->createUser('reader@example.com', 'password123');
+
+        $this->mergePatchRequest('PATCH', '/users/me', [
+            'email' => 'updated@example.com',
+        ], $this->authHeaderFor($user));
+        self::assertResponseIsSuccessful();
+
+        $reloadedUser = static::getContainer()->get(UserRepository::class)->findOneByEmail('updated@example.com');
+        self::assertNotNull($reloadedUser);
+
+        $this->client->request(
+            'GET',
+            '/users/me',
+            [],
+            [],
+            array_merge([
+                'HTTP_ACCEPT' => 'application/json',
+            ], $this->authHeaderFor($reloadedUser))
+        );
+
+        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
+        self::assertSame(
+            'Please verify your email address before accessing this resource.',
+            $this->responseData()['message']
+        );
+    }
+
     public function testUpdateRejectsDuplicateEmail(): void
     {
         $user = $this->createUser('reader@example.com', 'password123');

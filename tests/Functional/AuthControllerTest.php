@@ -117,6 +117,31 @@ class AuthControllerTest extends ApiTestCase
         self::assertSame('refresh@example.com', $data['user']['email']);
     }
 
+    public function testRefreshTokenRejectsUsersWhoBecomeUnverified(): void
+    {
+        $user = $this->createUser('refresh@example.com', 'password123');
+
+        $this->jsonRequest('POST', '/auth/login', [
+            'email' => 'refresh@example.com',
+            'password' => 'password123',
+        ]);
+        self::assertNotNull($this->browserCookieValue());
+
+        $this->mergePatchRequest('PATCH', '/users/me', [
+            'email' => 'pending@example.com',
+        ], $this->authHeaderFor($user));
+        self::assertResponseIsSuccessful();
+
+        $this->jsonRequest('POST', '/auth/refresh-token');
+
+        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
+        self::assertSame(
+            'Please verify your email address before accessing this resource.',
+            $this->responseData()['message']
+        );
+        self::assertSame('', $this->browserCookieValue() ?? '');
+    }
+
     public function testRefreshTokenRejectsMissingCookie(): void
     {
         $this->jsonRequest('POST', '/auth/refresh-token');
