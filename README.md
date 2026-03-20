@@ -28,10 +28,10 @@ docker compose up -d --build
 ```
 
 Lance le conteneur *cesizen-api*, contenant les services suivants :
-* **MariaDB**
-* **Mailpit**
-* **PHPMyAdmin**
-* L'**api**
+* database-1 : **MariaDB**
+* mailpit-1 : **Mailpit**
+* phpmyadmin-1 : **PHPMyAdmin**
+* api-1 : L'**api**
 
 ### Liens utiles
 
