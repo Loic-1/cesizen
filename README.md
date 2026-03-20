@@ -38,7 +38,7 @@ docker compose up -d --build
 
 [http://localhost:8080](http://localhost:8080) &rarr; Interface web **PHPMyAdmin**
 
-[http://localhost: 8025](http://localhost:%208025) &rarr; Interface web **Mailpit**
+[http://localhost:8025](http://localhost:%208025) &rarr; Interface web **Mailpit**
 
 [Collection Postman](https://github.com/Loic-1/cesizen-api/blob/main/doc/cesizen-api.postman_collection.json)
 
