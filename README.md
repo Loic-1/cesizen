@@ -1,6 +1,6 @@
 ## Guide d'installation
 
-### Requis
+### Technologies requises
 
 * Docker
 * Git
