@@ -17,7 +17,7 @@ cd cesizen-api
 
 ### Variables d'environnement
 
-
+Utilisez les fichiers *.env*, *.env.test* et *.env.dev* de ce repo
 
 ### Lancement des containers Docker
 
