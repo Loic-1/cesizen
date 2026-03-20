@@ -41,5 +41,5 @@ Lance le conteneur *cesizen-api*, contenant les services suivants :
 
 [http://localhost:8025](http://localhost:%208025) &rarr; Interface web **Mailpit**
 
-[Collection Postman](https://github.com/Loic-1/cesizen-api/blob/main/doc/cesizen-api.postman_collection.json)
+[Collection Postman](https://github.com/Loic-1/cesizen-api/blob/main/doc/cesizen-api.postman_collection.json) &rarr; Pour tester les endpoints
 
