@@ -1,0 +1,598 @@
+{
+  "info": {
+    "_postman_id": "76795aac-89d3-4c7a-b826-576ea0cb0119",
+    "name": "cesizen-api",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "40836365"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Création de compte",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"user1@test.fr\",\r\n  \"password\": \"password123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{api_base_url}}/auth/register",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Connexion",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"user1@test.fr\",\r\n  \"password\": \"password123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{api_base_url}}/auth/login",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Régénération access-token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{api_base_url}}/auth/refresh-token",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "auth",
+                "refresh-token"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Déconnexion de sa session",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{api_base_url}}/auth/logout",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Déconnexion d'un utilisateur",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{api_base_url}}/admin/users/?uuid=1/logout",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "uuid",
+                  "value": "1",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "uuid",
+                  "value": "1/logout"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Vérifier son courriel",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"user1@test.fr\",\r\n  \"password\": \"password123\"\r\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/auth/verify-email",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "auth",
+                "verify-email"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Renvoyer le mail de vérification",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"user1@test.fr\",\r\n  \"password\": \"password123\"\r\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/auth/resend-verification-email",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "auth",
+                "resend-verification-email"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Récupérer ses informations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_base_url}}/users/me",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "users",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Modifier ses informations",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{api_base_url}}/users/me",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "users",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Modifier son mot de passe",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{api_base_url}}/users/me/password",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Supprimer son compte",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{api_base_url}}/users/me",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "users",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Récupérer tous les utilisateurs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_base_url}}/admin/users",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "admin",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Récupérer un utilisateur",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_base_url}}/admin/users/?uuid=1",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "uuid",
+                  "value": "1",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Modifier un utilisateur",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{api_base_url}}/admin/users/?uuid=1",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "uuid",
+                  "value": "1",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Supprimer un utilisateur",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{api_base_url}}/admin/users/?uuid=1",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "uuid",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Articles",
+      "item": [
+        {
+          "name": "Récupérer tous les articles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_base_url}}/articles",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "articles"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Récupérer un article",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_base_url}}/articles/?uuid=1",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "articles",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "uuid",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ajouter un article",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{api_base_url}}/admin/articles",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "admin",
+                "articles"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Modifier un article",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{api_base_url}}/admin/articles/?uuid=1",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "admin",
+                "articles",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "uuid",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Supprimer un article",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{api_base_url}}/admin/articles/?uuid=1",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "admin",
+                "articles",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "uuid",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Files",
+      "item": [
+        {
+          "name": "Récupérer les fichiers d'un article",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_base_url}}/articles/?uuid=1/files",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "articles",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "uuid",
+                  "value": "1/files"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ajouter un fichier à un article",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{api_base_url}}/admin/articles/?uuid=1/files",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "admin",
+                "articles",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "uuid",
+                  "value": "1/files"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Supprimer un fichier",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{api_base_url}}/admin/files/?uuid=1",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "admin",
+                "files",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "uuid",
+                  "value": "1",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Récupérer tous les fichiers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_base_url}}/admin/files",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "admin",
+                "files"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "api_base_url",
+      "value": ""
+    }
+  ]
+}
