@@ -9,7 +9,6 @@
 
 ```bash
 
-# Dans le dossier cible
 # Récupère le projet depuis le repository GitHub
 git clone https://github.com/Loic-1/cesizen-api
 
