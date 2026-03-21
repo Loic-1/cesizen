@@ -33,5 +33,5 @@ RUN mkdir -p var/cache var/log public/bundles \
 COPY docker/api-entrypoint.sh /usr/local/bin/api-entrypoint.sh
 RUN chmod +x /usr/local/bin/api-entrypoint.sh
 
-ENTRYPOINT ["api-entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/api-entrypoint.sh"]
 CMD ["apache2-foreground"]

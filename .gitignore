@@ -1,24 +1,29 @@
 
 ### Symfony / Runtime
-/.env.local
-/.env.local.php
-/.env.*.local
-/config/secrets/prod/prod.decrypt.private.php
-/public/bundles/
-/var/
+/cesizen-api/.env.local
+/cesizen-api/.env.local.php
+/cesizen-api/.env.*.local
+/cesizen-api/config/secrets/prod/prod.decrypt.private.php
+/cesizen-api/public/bundles/
+/cesizen-api/var/
 
 ### Dependencies
-/vendor/
+/cesizen-api/vendor/
+/cesizen-app/node_modules/
 
 ### Composer
-/.composer/
-/composer.phar
+/cesizen-api/.composer/
+/cesizen-api/composer.phar
 
 ### PHPUnit / Coverage
-/.phpunit.cache/
-/phpunit.xml
-/build/
-/coverage/
+/cesizen-api/.phpunit.cache/
+/cesizen-api/phpunit.xml
+/cesizen-api/build/
+/cesizen-api/coverage/
+
+### Frontend Build
+/cesizen-app/dist/
+/cesizen-app/.next/
 
 ### Logs
 *.log
