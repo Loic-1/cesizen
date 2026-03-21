@@ -1,4 +1,4 @@
-## Guide d'installation
+# Documentation CESIZen
 
 ## Structure du projet
 
@@ -10,6 +10,8 @@ cesizen-api/
   compose.yaml
   README.md
 ```
+
+## Guide d'installation
 
 ### Technologies requises
 
@@ -28,7 +30,7 @@ cd cesizen-api
 
 ### Variables d'environnement
 
-Stockees dans les fichiers *.env*, *.env.test* et *.env.dev* du backend, dans `cesizen-api/`
+Stockées dans les fichiers *.env*, *.env.test* et *.env.dev* du backend, dans `cesizen-api/`
 
 ### Lancement des containers Docker
 
