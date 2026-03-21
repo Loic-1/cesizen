@@ -5,7 +5,7 @@
 ```text
 cesizen-api/
   cesizen-api/  # Backend Symfony
-  cesizen-app/  # Frontend placeholder
+  cesizen-app/  # Frontend ReactJS
   doc/          # Documentation
   compose.yaml
   README.md
@@ -19,7 +19,7 @@ cesizen-api/
 ### Cloner le repository
 
 ```bash
-# Recupere le projet depuis le repository GitHub
+# Récupère le projet depuis le repository GitHub
 git clone https://github.com/Loic-1/cesizen-api
 
 # Pour rentrer dans le dossier du projet
@@ -38,9 +38,9 @@ docker compose up -d --build
 ```
 
 Lance le conteneur *cesizen-api*, contenant les services suivants :
-* database-1 : **MariaDB**, SGBD relationnel pour le stockage des donnees
+* database-1 : **MariaDB**, SGBD relationnel pour le stockage des données
 * mailpit-1 : **Mailpit**, outil de test SMTP pour l'envoi des mails
-* phpmyadmin-1 : **PHPMyAdmin**, interface web d'administration de la base de donnees
+* phpmyadmin-1 : **PHPMyAdmin**, interface web d'administration de la base de données
 * api-1 : L'**api**, le backend de Cesizen
 
 ### Liens utiles
