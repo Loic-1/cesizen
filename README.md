@@ -4,8 +4,9 @@
 
 ```text
 cesizen-api/
-  cesizen-api/   # Backend Symfony
-  cesizen-app/   # Frontend placeholder
+  cesizen-api/  # Backend Symfony
+  cesizen-app/  # Frontend placeholder
+  doc/          # Documentation
   compose.yaml
   README.md
 ```
