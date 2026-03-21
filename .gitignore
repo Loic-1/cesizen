@@ -24,6 +24,7 @@
 ### Frontend Build
 /cesizen-app/dist/
 /cesizen-app/.next/
+/cesizen-app/.vite/
 
 ### Logs
 *.log
