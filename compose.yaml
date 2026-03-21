@@ -4,7 +4,7 @@ services:
   # Lance le conteneur d'API Symfony
   api:
     build:
-      context: .
+      context: ./cesizen-api
       dockerfile: Dockerfile
     depends_on:
       database:
