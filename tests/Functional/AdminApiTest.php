@@ -100,6 +100,20 @@ class AdminApiTest extends ApiTestCase
         self::assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
     }
 
+    public function testArticleCreationRejectsUnknownAuthor(): void
+    {
+        $admin = $this->createUser('admin@example.com', 'password123', ['ROLE_ADMIN']);
+
+        $this->jsonRequest('POST', '/admin/articles', [
+            'userId' => '11111111-1111-4111-8111-111111111111',
+            'title' => 'Missing author',
+            'description' => 'Desc',
+            'content' => 'Some content',
+        ], $this->authHeaderFor($admin));
+
+        self::assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
+    }
+
     public function testFilesRoutesSupportPublicArticleListingAndAdminManagement(): void
     {
         $admin = $this->createUser('admin@example.com', 'password123', ['ROLE_ADMIN']);
@@ -146,6 +160,20 @@ class AdminApiTest extends ApiTestCase
         $this->client->request('GET', '/articles/00000000-0000-0000-0000-000000000000/files', [], [], [
             'HTTP_ACCEPT' => 'application/json',
         ]);
+
+        self::assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
+    }
+
+    public function testAdminFileCreationReturnsNotFoundForUnknownArticle(): void
+    {
+        $admin = $this->createUser('admin@example.com', 'password123', ['ROLE_ADMIN']);
+
+        $this->jsonRequest('POST', '/admin/articles/00000000-0000-0000-0000-000000000000/files', [
+            'originalName' => 'sample.epub',
+            'storagePath' => '/files/sample.epub',
+            'mimeType' => 'application/epub+zip',
+            'size' => 2048,
+        ], $this->authHeaderFor($admin));
 
         self::assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
     }
