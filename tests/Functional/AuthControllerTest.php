@@ -275,6 +275,30 @@ class AuthControllerTest extends ApiTestCase
         self::assertTrue($user->isVerified());
     }
 
+    public function testVerifyEmailRequiresToken(): void
+    {
+        $this->client->request('GET', '/auth/verify-email', [], [], [
+            'HTTP_ACCEPT' => 'application/json',
+        ]);
+
+        self::assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
+        self::assertSame('Missing verification token.', $this->responseData()['message']);
+    }
+
+    public function testVerifyEmailRejectsInvalidToken(): void
+    {
+        $this->client->request(
+            'GET',
+            '/auth/verify-email',
+            ['token' => 'invalid-token'],
+            [],
+            ['HTTP_ACCEPT' => 'application/json']
+        );
+
+        self::assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
+        self::assertSame('Invalid or expired verification token.', $this->responseData()['message']);
+    }
+
     public function testResendVerificationEmailIssuesANewVerificationLink(): void
     {
         $this->createUser('pending@example.com', 'password123', ['ROLE_USER'], false);
@@ -292,5 +316,23 @@ class AuthControllerTest extends ApiTestCase
         $sentEmails = static::getContainer()->get(VerificationEmailSender::class)->sentEmails();
         self::assertCount(1, $sentEmails);
         self::assertSame('pending@example.com', $sentEmails[0]['to']);
+    }
+
+    public function testResendVerificationEmailDoesNotSendAnythingForVerifiedUsers(): void
+    {
+        $this->createUser('verified@example.com', 'password123', ['ROLE_USER'], true);
+
+        $this->jsonRequest('POST', '/auth/resend-verification-email', [
+            'email' => 'verified@example.com',
+        ]);
+
+        self::assertResponseIsSuccessful();
+        self::assertSame(
+            'If the account exists and is not yet verified, a verification email has been sent.',
+            $this->responseData()['message']
+        );
+
+        $sentEmails = static::getContainer()->get(VerificationEmailSender::class)->sentEmails();
+        self::assertCount(0, $sentEmails);
     }
 }

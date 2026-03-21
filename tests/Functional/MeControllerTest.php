@@ -98,6 +98,19 @@ class MeControllerTest extends ApiTestCase
         self::assertSame('Email already in use.', $this->responseData()['message']);
     }
 
+    public function testUpdateWithSameEmailDoesNotResendVerificationEmail(): void
+    {
+        $user = $this->createUser('reader@example.com', 'password123');
+
+        $this->mergePatchRequest('PATCH', '/users/me', [
+            'email' => 'reader@example.com',
+        ], $this->authHeaderFor($user));
+
+        self::assertResponseIsSuccessful();
+        self::assertSame('reader@example.com', $this->responseData()['email']);
+        self::assertCount(0, static::getContainer()->get(VerificationEmailSender::class)->sentEmails());
+    }
+
     public function testChangePasswordUpdatesStoredPassword(): void
     {
         $user = $this->createUser('reader@example.com', 'password123');

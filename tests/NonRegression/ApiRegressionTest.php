@@ -63,4 +63,30 @@ class ApiRegressionTest extends ApiTestCase
         self::assertCount(1, $files);
         self::assertSame(0, $files[0]->getSize());
     }
+
+    public function testLogoutRemainsAccessibleAfterUserBecomesUnverified(): void
+    {
+        $user = $this->createUser('reader@example.com', 'password123');
+
+        $this->jsonRequest('POST', '/auth/login', [
+            'email' => 'reader@example.com',
+            'password' => 'password123',
+        ]);
+        $refreshToken = $this->browserCookieValue();
+        self::assertNotNull($refreshToken);
+
+        $this->mergePatchRequest('PATCH', '/users/me', [
+            'email' => 'updated@example.com',
+        ], $this->authHeaderFor($user));
+        self::assertResponseIsSuccessful();
+
+        $reloadedUser = static::getContainer()->get(UserRepository::class)->findOneByEmail('updated@example.com');
+        self::assertNotNull($reloadedUser);
+        self::assertFalse($reloadedUser->isVerified());
+
+        $this->jsonRequest('POST', '/auth/logout', [], $this->authHeaderFor($reloadedUser));
+
+        self::assertResponseStatusCodeSame(Response::HTTP_NO_CONTENT);
+        self::assertSame('', $this->browserCookieValue() ?? '');
+    }
 }
