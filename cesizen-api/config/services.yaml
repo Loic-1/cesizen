@@ -16,12 +16,15 @@ parameters:
     app.refresh_token_cookie_secure: '%env(bool:REFRESH_TOKEN_COOKIE_SECURE)%'
     app.email_verification_ttl: '%env(int:EMAIL_VERIFICATION_TTL)%'
     app.mailer_from_email: '%env(MAILER_FROM_EMAIL)%'
+    app.frontend_url: '%env(FRONTEND_URL)%'
 
 services:
     # default configuration for services in *this* file
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        bind:
+            $frontendUrl: '%app.frontend_url%'
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name

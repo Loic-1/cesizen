@@ -9,6 +9,9 @@ api_platform:
         json:
             mime_types:
                 - application/json
+    error_formats:
+        json:
+            - application/json
     patch_formats:
         json:
             mime_types:

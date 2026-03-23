@@ -15,7 +15,9 @@ use App\Service\RefreshTokenManager;
 use App\Service\RequestPayloadResolver;
 use App\Service\VerificationEmailSender;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,12 +25,14 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Uid\Uuid;
 
 class AuthController extends AbstractController
 {
+    private const LOGIN_ATTEMPT_LIMIT = 5;
+    private const LOGIN_ATTEMPT_WINDOW_IN_SECONDS = 900;
+
     /**
      * Constructeur de la classe avec promotion de propriétés pour les services nécessaires.
      * @param RequestPayloadResolver $payloadResolver
@@ -40,12 +44,15 @@ class AuthController extends AbstractController
         private readonly RequestPayloadResolver $payloadResolver,
         private readonly UserRepository $userRepository,
         private readonly UserPasswordHasherInterface $passwordHasher,
+        #[Autowire(service: 'cache.app')]
+        private readonly CacheItemPoolInterface $loginAttemptCache,
         private readonly JwtTokenManager $jwtTokenManager,
         private readonly RefreshTokenManager $refreshTokenManager,
         private readonly RefreshTokenCookieManager $refreshTokenCookieManager,
         private readonly EmailVerificationManager $emailVerificationManager,
         private readonly VerificationEmailSender $verificationEmailSender,
         private readonly EntityManagerInterface $entityManager,
+        private readonly string $frontendUrl,
     )
     {
     }
@@ -93,10 +100,25 @@ class AuthController extends AbstractController
     {
         /** @var LoginInput $input */
         $input = $this->payloadResolver->resolve($request, LoginInput::class);
+        $attemptKey = $this->buildLoginAttemptCacheKey($request, (string) $input->email);
+        $attemptData = $this->getLoginAttemptData($attemptKey);
+
+        if ($attemptData['count'] >= self::LOGIN_ATTEMPT_LIMIT && $attemptData['resetAt'] > time())
+        {
+            $response = $this->json(
+                ['message' => 'Too many login attempts. Please try again later.'],
+                Response::HTTP_TOO_MANY_REQUESTS
+            );
+            $response->headers->set('Retry-After', (string) max(1, $attemptData['resetAt'] - time()));
+
+            return $response;
+        }
 
         $user = $this->userRepository->findOneByEmail((string) $input->email);
         if ($user === null || !$this->passwordHasher->isPasswordValid($user, (string) $input->password))
         {
+            $this->recordFailedLoginAttempt($attemptKey, $attemptData);
+
             return $this->json(['message' => 'Invalid credentials.'], Response::HTTP_UNAUTHORIZED);
         }
 
@@ -106,6 +128,8 @@ class AuthController extends AbstractController
                 'message' => 'Please verify your email address before logging in.',
             ], Response::HTTP_FORBIDDEN);
         }
+
+        $this->clearLoginAttempts($attemptKey);
 
         return $this->buildAuthResponse($user);
     }
@@ -267,10 +291,68 @@ class AuthController extends AbstractController
     private function sendVerificationEmail(User $user): void
     {
         $verificationToken = $this->emailVerificationManager->create($user);
-        $verificationUrl = $this->generateUrl('auth_verify_email', [
-            'token' => $verificationToken->plainToken,
-        ], UrlGeneratorInterface::ABSOLUTE_URL);
+        $verificationUrl = sprintf(
+            '%s/verify-email?token=%s',
+            rtrim($this->frontendUrl, '/'),
+            urlencode($verificationToken->plainToken)
+        );
 
         $this->verificationEmailSender->send($user, $verificationUrl);
+    }
+
+    private function buildLoginAttemptCacheKey(Request $request, string $email): string
+    {
+        $normalizedEmail = mb_strtolower(trim($email));
+        $clientIp = $request->getClientIp() ?? 'unknown';
+
+        return 'login_attempts_'.hash('sha256', $normalizedEmail.'|'.$clientIp);
+    }
+
+    /**
+     * @return array{count: int, resetAt: int}
+     */
+    private function getLoginAttemptData(string $attemptKey): array
+    {
+        $item = $this->loginAttemptCache->getItem($attemptKey);
+        $value = $item->isHit() ? $item->get() : null;
+
+        if (!is_array($value) || !isset($value['count'], $value['resetAt'])) {
+            return [
+                'count' => 0,
+                'resetAt' => time() + self::LOGIN_ATTEMPT_WINDOW_IN_SECONDS,
+            ];
+        }
+
+        return [
+            'count' => (int) $value['count'],
+            'resetAt' => (int) $value['resetAt'],
+        ];
+    }
+
+    /**
+     * @param array{count: int, resetAt: int} $attemptData
+     */
+    private function recordFailedLoginAttempt(string $attemptKey, array $attemptData): void
+    {
+        $now = time();
+        if ($attemptData['resetAt'] <= $now) {
+            $attemptData = [
+                'count' => 0,
+                'resetAt' => $now + self::LOGIN_ATTEMPT_WINDOW_IN_SECONDS,
+            ];
+        }
+
+        $item = $this->loginAttemptCache->getItem($attemptKey);
+        $item->set([
+            'count' => $attemptData['count'] + 1,
+            'resetAt' => $attemptData['resetAt'],
+        ]);
+        $item->expiresAfter(max(1, $attemptData['resetAt'] - $now));
+        $this->loginAttemptCache->save($item);
+    }
+
+    private function clearLoginAttempts(string $attemptKey): void
+    {
+        $this->loginAttemptCache->deleteItem($attemptKey);
     }
 }

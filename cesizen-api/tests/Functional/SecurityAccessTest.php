@@ -18,7 +18,7 @@ class SecurityAccessTest extends ApiTestCase
 
     public function testAdminRoutesRejectNonAdminUsers(): void
     {
-        $user = $this->createUser('member@example.com', 'password123');
+        $user = $this->createUser('member@example.com', self::DEFAULT_PASSWORD);
 
         $this->client->request('GET', '/admin/users', [], [], array_merge([
             'HTTP_ACCEPT' => 'application/json',

@@ -13,7 +13,7 @@ class AuthControllerTest extends ApiTestCase
     {
         $this->jsonRequest('POST', '/auth/register', [
             'email' => 'new.user@example.com',
-            'password' => 'password123',
+            'password' => self::DEFAULT_PASSWORD,
         ]);
 
         self::assertResponseStatusCodeSame(Response::HTTP_CREATED);
@@ -40,20 +40,56 @@ class AuthControllerTest extends ApiTestCase
 
         $this->jsonRequest('POST', '/auth/register', [
             'email' => 'existing@example.com',
-            'password' => 'password123',
+            'password' => self::DEFAULT_PASSWORD,
         ]);
 
         self::assertResponseStatusCodeSame(Response::HTTP_CONFLICT);
         self::assertSame('Email already in use.', $this->responseData()['message']);
     }
 
+    public function testRegisterRejectsPasswordsShorterThanTwelveCharacters(): void
+    {
+        $this->jsonRequest('POST', '/auth/register', [
+            'email' => 'too-short@example.com',
+            'password' => 'court123',
+        ]);
+
+        self::assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
+        self::assertStringContainsString('password:', $this->responseData()['detail']);
+    }
+
+    public function testRegisterRejectsCommonPasswords(): void
+    {
+        $this->jsonRequest('POST', '/auth/register', [
+            'email' => 'common@example.com',
+            'password' => 'password123!',
+        ]);
+
+        self::assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
+        self::assertStringContainsString('Choose a less common password.', $this->responseData()['detail']);
+    }
+
+    public function testRegisterRejectsPasswordsWithoutExpectedCharacterClasses(): void
+    {
+        $this->jsonRequest('POST', '/auth/register', [
+            'email' => 'classes@example.com',
+            'password' => 'motdepassefort',
+        ]);
+
+        self::assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
+        self::assertStringContainsString(
+            'Password must contain at least one lowercase letter, one uppercase letter, and one special character.',
+            $this->responseData()['detail']
+        );
+    }
+
     public function testLoginReturnsTokensForValidCredentials(): void
     {
-        $this->createUser('login@example.com', 'password123');
+        $this->createUser('login@example.com', self::DEFAULT_PASSWORD);
 
         $this->jsonRequest('POST', '/auth/login', [
             'email' => 'login@example.com',
-            'password' => 'password123',
+            'password' => self::DEFAULT_PASSWORD,
         ]);
 
         self::assertResponseIsSuccessful();
@@ -70,11 +106,11 @@ class AuthControllerTest extends ApiTestCase
 
     public function testLoginRejectsUnverifiedUsers(): void
     {
-        $this->createUser('pending@example.com', 'password123', ['ROLE_USER'], false);
+        $this->createUser('pending@example.com', self::DEFAULT_PASSWORD, ['ROLE_USER'], false);
 
         $this->jsonRequest('POST', '/auth/login', [
             'email' => 'pending@example.com',
-            'password' => 'password123',
+            'password' => self::DEFAULT_PASSWORD,
         ]);
 
         self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
@@ -83,7 +119,7 @@ class AuthControllerTest extends ApiTestCase
 
     public function testLoginRejectsInvalidCredentials(): void
     {
-        $this->createUser('login@example.com', 'password123');
+        $this->createUser('login@example.com', self::DEFAULT_PASSWORD);
 
         $this->jsonRequest('POST', '/auth/login', [
             'email' => 'login@example.com',
@@ -94,13 +130,36 @@ class AuthControllerTest extends ApiTestCase
         self::assertSame('Invalid credentials.', $this->responseData()['message']);
     }
 
+    public function testLoginIsRateLimitedAfterTooManyFailedAttempts(): void
+    {
+        $this->createUser('login@example.com', self::DEFAULT_PASSWORD);
+
+        for ($attempt = 0; $attempt < 5; ++$attempt) {
+            $this->jsonRequest('POST', '/auth/login', [
+                'email' => 'login@example.com',
+                'password' => 'wrong-password',
+            ]);
+
+            self::assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
+        }
+
+        $this->jsonRequest('POST', '/auth/login', [
+            'email' => 'login@example.com',
+            'password' => 'wrong-password',
+        ]);
+
+        self::assertResponseStatusCodeSame(Response::HTTP_TOO_MANY_REQUESTS);
+        self::assertSame('Too many login attempts. Please try again later.', $this->responseData()['message']);
+        self::assertTrue($this->client->getResponse()->headers->has('Retry-After'));
+    }
+
     public function testRefreshTokenUsesCookieAndRotatesToken(): void
     {
-        $this->createUser('refresh@example.com', 'password123');
+        $this->createUser('refresh@example.com', self::DEFAULT_PASSWORD);
 
         $this->jsonRequest('POST', '/auth/login', [
             'email' => 'refresh@example.com',
-            'password' => 'password123',
+            'password' => self::DEFAULT_PASSWORD,
         ]);
         $firstRefreshToken = $this->browserCookieValue();
         self::assertNotNull($firstRefreshToken);
@@ -119,11 +178,11 @@ class AuthControllerTest extends ApiTestCase
 
     public function testRefreshTokenRejectsUsersWhoBecomeUnverified(): void
     {
-        $user = $this->createUser('refresh@example.com', 'password123');
+        $user = $this->createUser('refresh@example.com', self::DEFAULT_PASSWORD);
 
         $this->jsonRequest('POST', '/auth/login', [
             'email' => 'refresh@example.com',
-            'password' => 'password123',
+            'password' => self::DEFAULT_PASSWORD,
         ]);
         self::assertNotNull($this->browserCookieValue());
 
@@ -152,11 +211,11 @@ class AuthControllerTest extends ApiTestCase
 
     public function testRotatedRefreshTokenCannotBeReused(): void
     {
-        $this->createUser('rotate@example.com', 'password123');
+        $this->createUser('rotate@example.com', self::DEFAULT_PASSWORD);
 
         $this->jsonRequest('POST', '/auth/login', [
             'email' => 'rotate@example.com',
-            'password' => 'password123',
+            'password' => self::DEFAULT_PASSWORD,
         ]);
         $firstRefreshToken = $this->browserCookieValue();
         self::assertNotNull($firstRefreshToken);
@@ -176,11 +235,11 @@ class AuthControllerTest extends ApiTestCase
 
     public function testLogoutRevokesUserRefreshTokensAndClearsCookie(): void
     {
-        $user = $this->createUser('logout@example.com', 'password123');
+        $user = $this->createUser('logout@example.com', self::DEFAULT_PASSWORD);
 
         $this->jsonRequest('POST', '/auth/login', [
             'email' => 'logout@example.com',
-            'password' => 'password123',
+            'password' => self::DEFAULT_PASSWORD,
         ]);
         $refreshToken = $this->browserCookieValue();
         self::assertNotNull($refreshToken);
@@ -199,16 +258,16 @@ class AuthControllerTest extends ApiTestCase
 
     public function testAdminCanRevokeAllSessionsForAUser(): void
     {
-        $admin = $this->createUser('admin@example.com', 'password123', ['ROLE_ADMIN']);
-        $user = $this->createUser('member@example.com', 'password123');
+        $admin = $this->createUser('admin@example.com', self::DEFAULT_PASSWORD, ['ROLE_ADMIN']);
+        $user = $this->createUser('member@example.com', self::DEFAULT_PASSWORD);
 
         $this->jsonRequest('POST', '/auth/login', [
             'email' => 'member@example.com',
-            'password' => 'password123',
+            'password' => self::DEFAULT_PASSWORD,
         ]);
         $this->jsonRequest('POST', '/auth/login', [
             'email' => 'member@example.com',
-            'password' => 'password123',
+            'password' => self::DEFAULT_PASSWORD,
         ]);
 
         $this->client->request(
@@ -230,7 +289,7 @@ class AuthControllerTest extends ApiTestCase
 
     public function testAdminLogoutReturnsNotFoundForUnknownUser(): void
     {
-        $admin = $this->createUser('admin@example.com', 'password123', ['ROLE_ADMIN']);
+        $admin = $this->createUser('admin@example.com', self::DEFAULT_PASSWORD, ['ROLE_ADMIN']);
 
         $this->client->request(
             'POST',
@@ -250,7 +309,7 @@ class AuthControllerTest extends ApiTestCase
     {
         $this->jsonRequest('POST', '/auth/register', [
             'email' => 'verify.me@example.com',
-            'password' => 'password123',
+            'password' => self::DEFAULT_PASSWORD,
         ]);
 
         $sentEmails = static::getContainer()->get(VerificationEmailSender::class)->sentEmails();
@@ -301,7 +360,7 @@ class AuthControllerTest extends ApiTestCase
 
     public function testResendVerificationEmailIssuesANewVerificationLink(): void
     {
-        $this->createUser('pending@example.com', 'password123', ['ROLE_USER'], false);
+        $this->createUser('pending@example.com', self::DEFAULT_PASSWORD, ['ROLE_USER'], false);
 
         $this->jsonRequest('POST', '/auth/resend-verification-email', [
             'email' => 'pending@example.com',
@@ -320,7 +379,7 @@ class AuthControllerTest extends ApiTestCase
 
     public function testResendVerificationEmailDoesNotSendAnythingForVerifiedUsers(): void
     {
-        $this->createUser('verified@example.com', 'password123', ['ROLE_USER'], true);
+        $this->createUser('verified@example.com', self::DEFAULT_PASSWORD, ['ROLE_USER'], true);
 
         $this->jsonRequest('POST', '/auth/resend-verification-email', [
             'email' => 'verified@example.com',

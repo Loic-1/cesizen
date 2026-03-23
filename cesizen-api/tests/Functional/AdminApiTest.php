@@ -11,8 +11,8 @@ class AdminApiTest extends ApiTestCase
 {
     public function testAdminUsersRoutesSupportListGetPatchAndDelete(): void
     {
-        $admin = $this->createUser('admin@example.com', 'password123', ['ROLE_ADMIN']);
-        $user = $this->createUser('member@example.com', 'password123');
+        $admin = $this->createUser('admin@example.com', self::DEFAULT_PASSWORD, ['ROLE_ADMIN']);
+        $user = $this->createUser('member@example.com', self::DEFAULT_PASSWORD);
 
         $this->client->request('GET', '/admin/users', [], [], array_merge([
             'HTTP_ACCEPT' => 'application/json',
@@ -48,8 +48,8 @@ class AdminApiTest extends ApiTestCase
 
     public function testArticlesRoutesSupportPublicReadAndAdminWrite(): void
     {
-        $admin = $this->createUser('admin@example.com', 'password123', ['ROLE_ADMIN']);
-        $author = $this->createUser('author@example.com', 'password123');
+        $admin = $this->createUser('admin@example.com', self::DEFAULT_PASSWORD, ['ROLE_ADMIN']);
+        $author = $this->createUser('author@example.com', self::DEFAULT_PASSWORD);
         $article = $this->createArticle($author, 'Existing article', 'Existing content', 'Existing description');
 
         $this->client->request('GET', '/articles', [], [], [
@@ -90,7 +90,7 @@ class AdminApiTest extends ApiTestCase
 
     public function testArticleCreationValidatesRequiredFields(): void
     {
-        $admin = $this->createUser('admin@example.com', 'password123', ['ROLE_ADMIN']);
+        $admin = $this->createUser('admin@example.com', self::DEFAULT_PASSWORD, ['ROLE_ADMIN']);
 
         $this->jsonRequest('POST', '/admin/articles', [
             'title' => 'Missing author',
@@ -102,7 +102,7 @@ class AdminApiTest extends ApiTestCase
 
     public function testArticleCreationRejectsUnknownAuthor(): void
     {
-        $admin = $this->createUser('admin@example.com', 'password123', ['ROLE_ADMIN']);
+        $admin = $this->createUser('admin@example.com', self::DEFAULT_PASSWORD, ['ROLE_ADMIN']);
 
         $this->jsonRequest('POST', '/admin/articles', [
             'userId' => '11111111-1111-4111-8111-111111111111',
@@ -116,8 +116,8 @@ class AdminApiTest extends ApiTestCase
 
     public function testFilesRoutesSupportPublicArticleListingAndAdminManagement(): void
     {
-        $admin = $this->createUser('admin@example.com', 'password123', ['ROLE_ADMIN']);
-        $author = $this->createUser('author@example.com', 'password123');
+        $admin = $this->createUser('admin@example.com', self::DEFAULT_PASSWORD, ['ROLE_ADMIN']);
+        $author = $this->createUser('author@example.com', self::DEFAULT_PASSWORD);
         $article = $this->createArticle($author, 'File article', 'Content', 'Description');
         $file = $this->createFile($article);
 
@@ -166,7 +166,7 @@ class AdminApiTest extends ApiTestCase
 
     public function testAdminFileCreationReturnsNotFoundForUnknownArticle(): void
     {
-        $admin = $this->createUser('admin@example.com', 'password123', ['ROLE_ADMIN']);
+        $admin = $this->createUser('admin@example.com', self::DEFAULT_PASSWORD, ['ROLE_ADMIN']);
 
         $this->jsonRequest('POST', '/admin/articles/00000000-0000-0000-0000-000000000000/files', [
             'originalName' => 'sample.epub',

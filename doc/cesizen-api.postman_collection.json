@@ -16,7 +16,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"email\": \"user1@test.fr\",\r\n  \"password\": \"password123\"\r\n}",
+              "raw": "{\r\n  \"email\": \"user1@test.fr\",\r\n  \"password\": \"MotDePasseFort123!\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -43,7 +43,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"email\": \"user1@test.fr\",\r\n  \"password\": \"password123\"\r\n}",
+              "raw": "{\r\n  \"email\": \"user1@test.fr\",\r\n  \"password\": \"MotDePasseFort123!\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -140,7 +140,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"email\": \"user1@test.fr\",\r\n  \"password\": \"password123\"\r\n}"
+              "raw": "{\r\n  \"email\": \"user1@test.fr\",\r\n  \"password\": \"MotDePasseFort123!\"\r\n}"
             },
             "url": {
               "raw": "{{api_base_url}}/auth/verify-email",
@@ -162,7 +162,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"email\": \"user1@test.fr\",\r\n  \"password\": \"password123\"\r\n}"
+              "raw": "{\r\n  \"email\": \"user1@test.fr\",\r\n  \"password\": \"MotDePasseFort123!\"\r\n}"
             },
             "url": {
               "raw": "{{api_base_url}}/auth/resend-verification-email",

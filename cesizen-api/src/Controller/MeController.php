@@ -16,7 +16,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -37,6 +36,7 @@ class MeController extends AbstractController
         private readonly EmailVerificationManager $emailVerificationManager,
         private readonly VerificationEmailSender $verificationEmailSender,
         private readonly EntityManagerInterface $entityManager,
+        private readonly string $frontendUrl,
     )
     {
     }
@@ -141,9 +141,11 @@ class MeController extends AbstractController
     private function sendVerificationEmail(User $user): void
     {
         $verificationToken = $this->emailVerificationManager->create($user);
-        $verificationUrl = $this->generateUrl('auth_verify_email', [
-            'token' => $verificationToken->plainToken,
-        ], UrlGeneratorInterface::ABSOLUTE_URL);
+        $verificationUrl = sprintf(
+            '%s/verify-email?token=%s',
+            rtrim($this->frontendUrl, '/'),
+            urlencode($verificationToken->plainToken)
+        );
 
         $this->verificationEmailSender->send($user, $verificationUrl);
     }
