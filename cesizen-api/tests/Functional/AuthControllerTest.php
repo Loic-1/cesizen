@@ -31,7 +31,7 @@ class AuthControllerTest extends ApiTestCase
         $sentEmails = static::getContainer()->get(VerificationEmailSender::class)->sentEmails();
         self::assertCount(1, $sentEmails);
         self::assertSame('new.user@example.com', $sentEmails[0]['to']);
-        self::assertStringContainsString('/auth/verify-email?token=', $sentEmails[0]['verificationUrl']);
+        self::assertStringContainsString('/verify-email?token=', $sentEmails[0]['verificationUrl']);
     }
 
     public function testRegisterRejectsDuplicateEmail(): void
