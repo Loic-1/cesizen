@@ -12,8 +12,8 @@ class ApiRegressionTest extends ApiTestCase
 {
     public function testAdminArticlePatchKeepsExistingDescriptionWhenOmitted(): void
     {
-        $admin = $this->createUser('admin@example.com', 'password123', ['ROLE_ADMIN']);
-        $author = $this->createUser('author@example.com', 'password123');
+        $admin = $this->createUser('admin@example.com', self::DEFAULT_PASSWORD, ['ROLE_ADMIN']);
+        $author = $this->createUser('author@example.com', self::DEFAULT_PASSWORD);
         $article = $this->createArticle($author, 'Original title', 'Original content', 'Keep me');
 
         $this->mergePatchRequest('PATCH', '/admin/articles/'.$article->getId()->toRfc4122(), [
@@ -31,7 +31,7 @@ class ApiRegressionTest extends ApiTestCase
 
     public function testUpdateMeWithEmptyPayloadKeepsCurrentEmail(): void
     {
-        $user = $this->createUser('reader@example.com', 'password123');
+        $user = $this->createUser('reader@example.com', self::DEFAULT_PASSWORD);
 
         $this->mergePatchRequest('PATCH', '/users/me', [], $this->authHeaderFor($user));
 
@@ -45,8 +45,8 @@ class ApiRegressionTest extends ApiTestCase
 
     public function testAdminCanCreateZeroSizedFile(): void
     {
-        $admin = $this->createUser('admin@example.com', 'password123', ['ROLE_ADMIN']);
-        $author = $this->createUser('author@example.com', 'password123');
+        $admin = $this->createUser('admin@example.com', self::DEFAULT_PASSWORD, ['ROLE_ADMIN']);
+        $author = $this->createUser('author@example.com', self::DEFAULT_PASSWORD);
         $article = $this->createArticle($author, 'File article', 'Body', 'Description');
 
         $this->jsonRequest('POST', '/admin/articles/'.$article->getId()->toRfc4122().'/files', [
@@ -66,11 +66,11 @@ class ApiRegressionTest extends ApiTestCase
 
     public function testLogoutRemainsAccessibleAfterUserBecomesUnverified(): void
     {
-        $user = $this->createUser('reader@example.com', 'password123');
+        $user = $this->createUser('reader@example.com', self::DEFAULT_PASSWORD);
 
         $this->jsonRequest('POST', '/auth/login', [
             'email' => 'reader@example.com',
-            'password' => 'password123',
+            'password' => self::DEFAULT_PASSWORD,
         ]);
         $refreshToken = $this->browserCookieValue();
         self::assertNotNull($refreshToken);

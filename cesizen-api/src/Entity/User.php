@@ -64,7 +64,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: 'json')]
     #[Assert\All([new Assert\Type('string')])]
-    #[Groups(['admin:user:read', 'admin:user:write'])]
+    #[Groups(['user:read', 'admin:user:read', 'admin:user:write'])]
     private array $roles = ['ROLE_USER'];
 
     #[ORM\Column(options: ['default' => false])]

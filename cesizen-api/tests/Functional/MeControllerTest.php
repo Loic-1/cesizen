@@ -10,7 +10,7 @@ class MeControllerTest extends ApiTestCase
 {
     public function testShowReturnsCurrentUser(): void
     {
-        $user = $this->createUser('reader@example.com', 'password123');
+        $user = $this->createUser('reader@example.com', self::DEFAULT_PASSWORD);
 
         $this->client->request(
             'GET',
@@ -38,7 +38,7 @@ class MeControllerTest extends ApiTestCase
 
     public function testUpdateChangesCurrentUserEmail(): void
     {
-        $user = $this->createUser('reader@example.com', 'password123');
+        $user = $this->createUser('reader@example.com', self::DEFAULT_PASSWORD);
 
         $this->mergePatchRequest('PATCH', '/users/me', [
             'email' => 'updated@example.com',
@@ -58,7 +58,7 @@ class MeControllerTest extends ApiTestCase
 
     public function testVerifiedEndpointsRejectUsersWhoBecomeUnverified(): void
     {
-        $user = $this->createUser('reader@example.com', 'password123');
+        $user = $this->createUser('reader@example.com', self::DEFAULT_PASSWORD);
 
         $this->mergePatchRequest('PATCH', '/users/me', [
             'email' => 'updated@example.com',
@@ -87,8 +87,8 @@ class MeControllerTest extends ApiTestCase
 
     public function testUpdateRejectsDuplicateEmail(): void
     {
-        $user = $this->createUser('reader@example.com', 'password123');
-        $this->createUser('taken@example.com', 'password123');
+        $user = $this->createUser('reader@example.com', self::DEFAULT_PASSWORD);
+        $this->createUser('taken@example.com', self::DEFAULT_PASSWORD);
 
         $this->mergePatchRequest('PATCH', '/users/me', [
             'email' => 'taken@example.com',
@@ -100,7 +100,7 @@ class MeControllerTest extends ApiTestCase
 
     public function testUpdateWithSameEmailDoesNotResendVerificationEmail(): void
     {
-        $user = $this->createUser('reader@example.com', 'password123');
+        $user = $this->createUser('reader@example.com', self::DEFAULT_PASSWORD);
 
         $this->mergePatchRequest('PATCH', '/users/me', [
             'email' => 'reader@example.com',
@@ -113,11 +113,11 @@ class MeControllerTest extends ApiTestCase
 
     public function testChangePasswordUpdatesStoredPassword(): void
     {
-        $user = $this->createUser('reader@example.com', 'password123');
+        $user = $this->createUser('reader@example.com', self::DEFAULT_PASSWORD);
 
         $this->mergePatchRequest('PATCH', '/users/me/password', [
-            'currentPassword' => 'password123',
-            'newPassword' => 'new-password123',
+            'currentPassword' => self::DEFAULT_PASSWORD,
+            'newPassword' => 'MotDePasseEncorePlusFort123!',
         ], $this->authHeaderFor($user));
 
         self::assertResponseIsSuccessful();
@@ -130,18 +130,18 @@ class MeControllerTest extends ApiTestCase
         self::assertTrue(
             static::getContainer()->get('security.user_password_hasher')->isPasswordValid(
                 $reloadedUser,
-                'new-password123'
+                'MotDePasseEncorePlusFort123!'
             )
         );
     }
 
     public function testChangePasswordRejectsInvalidCurrentPassword(): void
     {
-        $user = $this->createUser('reader@example.com', 'password123');
+        $user = $this->createUser('reader@example.com', self::DEFAULT_PASSWORD);
 
         $this->mergePatchRequest('PATCH', '/users/me/password', [
             'currentPassword' => 'bad-password',
-            'newPassword' => 'new-password123',
+            'newPassword' => 'MotDePasseEncorePlusFort123!',
         ], $this->authHeaderFor($user));
 
         self::assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
@@ -150,7 +150,7 @@ class MeControllerTest extends ApiTestCase
 
     public function testDeleteRemovesCurrentUser(): void
     {
-        $user = $this->createUser('reader@example.com', 'password123');
+        $user = $this->createUser('reader@example.com', self::DEFAULT_PASSWORD);
 
         $this->client->request(
             'DELETE',

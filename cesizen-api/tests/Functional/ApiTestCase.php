@@ -15,6 +15,8 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 abstract class ApiTestCase extends WebTestCase
 {
+    protected const DEFAULT_PASSWORD = 'MotDePasseFort123!';
+
     protected KernelBrowser $client;
 
     protected EntityManagerInterface $entityManager;
@@ -26,6 +28,7 @@ abstract class ApiTestCase extends WebTestCase
         self::ensureKernelShutdown();
         $this->client = static::createClient();
         $this->entityManager = static::getContainer()->get(EntityManagerInterface::class);
+        static::getContainer()->get('cache.app')->clear();
 
         $this->resetDatabase();
     }
@@ -54,7 +57,7 @@ abstract class ApiTestCase extends WebTestCase
 
     protected function createUser(
         string $email = 'user@example.com',
-        string $password = 'password123',
+        string $password = self::DEFAULT_PASSWORD,
         array $roles = ['ROLE_USER'],
         bool $isVerified = true,
     ): User {
