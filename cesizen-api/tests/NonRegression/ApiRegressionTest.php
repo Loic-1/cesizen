@@ -89,4 +89,35 @@ class ApiRegressionTest extends ApiTestCase
         self::assertResponseStatusCodeSame(Response::HTTP_NO_CONTENT);
         self::assertSame('', $this->browserCookieValue() ?? '');
     }
+
+    public function testAdminArticleContentIsSanitizedBeforePersisting(): void
+    {
+        $admin = $this->createUser('admin@example.com', self::DEFAULT_PASSWORD, ['ROLE_ADMIN']);
+        $author = $this->createUser('author@example.com', self::DEFAULT_PASSWORD);
+
+        $this->jsonRequest('POST', '/admin/articles', [
+            'userId' => $author->getId()->toRfc4122(),
+            'title' => 'Unsafe article',
+            'description' => 'Desc',
+            'content' => '<p>Safe</p><script>alert(1)</script><img src="/uploads/articles/test.webp" onerror="alert(1)"><a href="javascript:alert(1)" target="_blank">Click</a><strong>Keep</strong>',
+        ], $this->authHeaderFor($admin));
+
+        self::assertResponseStatusCodeSame(Response::HTTP_CREATED);
+
+        $sanitizedContent = $this->responseData()['content'] ?? null;
+        self::assertIsString($sanitizedContent);
+        self::assertStringNotContainsString('<script', $sanitizedContent);
+        self::assertStringNotContainsString('onerror', $sanitizedContent);
+        self::assertStringNotContainsString('javascript:', $sanitizedContent);
+        self::assertStringContainsString('<p>Safe</p>', $sanitizedContent);
+        self::assertStringContainsString('<img src="/uploads/articles/test.webp">', $sanitizedContent);
+        self::assertStringContainsString('<a target="_blank" rel="noopener noreferrer">Click</a>', $sanitizedContent);
+        self::assertStringContainsString('<strong>Keep</strong>', $sanitizedContent);
+
+        $createdArticleId = $this->responseData()['id'] ?? null;
+        self::assertIsString($createdArticleId);
+        $reloadedArticle = static::getContainer()->get(ArticleRepository::class)->find($createdArticleId);
+        self::assertNotNull($reloadedArticle);
+        self::assertSame($sanitizedContent, $reloadedArticle->getContent());
+    }
 }

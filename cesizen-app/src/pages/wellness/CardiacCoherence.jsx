@@ -152,12 +152,18 @@ export default function CardiacCoherencePage() {
     setRemainingSeconds(getInitialDuration(config))
   }
 
-  const phaseProgress =
+  const phaseElapsedProgress =
     currentPhaseDuration > 0
-      ? isCompleted
-        ? 100
-        : Math.min(100, ((currentPhaseDuration - remainingSeconds + 1) / currentPhaseDuration) * 100)
+      ? Math.min(100, ((currentPhaseDuration - remainingSeconds + 1) / currentPhaseDuration) * 100)
       : 0
+
+  const phaseProgress = isCompleted
+    ? 0
+    : currentPhase.key === 'exhale'
+      ? Math.max(0, 100 - phaseElapsedProgress)
+      : currentPhase.key === 'hold'
+        ? 100
+        : phaseElapsedProgress
 
   const breathingStyle = getBreathingStyle({
     isCompleted,

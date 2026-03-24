@@ -8,6 +8,7 @@ use App\Dto\Article\ArticleInput;
 use App\Entity\Article;
 use App\Repository\ArticleRepository;
 use App\Repository\UserRepository;
+use App\Service\ArticleContentSanitizer;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -22,6 +23,7 @@ class ArticleInputProcessor implements ProcessorInterface
         private readonly EntityManagerInterface $entityManager,
         private readonly ArticleRepository $articleRepository,
         private readonly UserRepository $userRepository,
+        private readonly ArticleContentSanitizer $articleContentSanitizer,
     ) {
     }
 
@@ -72,7 +74,7 @@ class ArticleInputProcessor implements ProcessorInterface
         }
 
         if ($data->content !== null) {
-            $article->setContent($data->content);
+            $article->setContent($this->articleContentSanitizer->sanitize($data->content));
         }
 
         if ($operation->getMethod() === 'POST') {
