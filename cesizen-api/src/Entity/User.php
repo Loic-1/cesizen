@@ -9,6 +9,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use App\Repository\UserRepository;
+use App\State\UserDeleteProcessor;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -42,7 +43,8 @@ use Symfony\Component\Validator\Constraints as Assert;
     ),
     new Delete(
         uriTemplate: '/admin/users/{id}',
-        security: "is_granted('ROLE_ADMIN')"
+        security: "is_granted('ROLE_ADMIN')",
+        processor: UserDeleteProcessor::class
     ),
 ])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -82,7 +84,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection<int, Article>
      */
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Article::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Article::class)]
     private Collection $articles;
 
     /**

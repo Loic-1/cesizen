@@ -76,16 +76,17 @@ abstract class ApiTestCase extends WebTestCase
     }
 
     protected function createArticle(
-        User $user,
+        ?User $user,
         string $title = 'First article',
         string $content = 'Article body',
         ?string $description = 'Short description'
     ): Article {
         $article = (new Article())
-            ->setUser($user)
             ->setTitle($title)
             ->setDescription($description)
             ->setContent($content);
+
+        $article->setUser($user);
 
         $this->entityManager->persist($article);
         $this->entityManager->flush();
