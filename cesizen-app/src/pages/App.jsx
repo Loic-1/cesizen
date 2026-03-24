@@ -6,12 +6,6 @@ import {
   formatArticleDate,
 } from "../lib/articles.js";
 
-const homeDescription = `
-Écrivez ici la description de la page d'accueil de Cesizen.
-Vous pouvez remplacer ce texte par votre propre présentation du projet,
-de ses objectifs et de l'expérience que vous voulez mettre en avant.
-`.trim();
-
 export default function AppPage() {
   const [articles, setArticles] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -69,19 +63,22 @@ export default function AppPage() {
       <section className="home">
         <article className="home__intro">
           <p className="eyebrow">Accueil</p>
-          <h1>Bienvenue sur <span className="cesizen-span">CESIZen</span></h1>
+          <h1>
+            Bienvenue sur <span className="cesizen-span">CESIZen</span>
+          </h1>
           <p className="home__description">
-            {/* {homeDescription} */}
-            Le projet <span className="cesizen-span">CESIZen</span> est une plateforme grand public proposant des
-            outils de gestion du stress et d’information autour de la santé
-            mentale. <br />
+            Le projet <span className="cesizen-span">CESIZen</span> est une
+            plateforme grand public proposant des outils de gestion du stress et
+            d’information autour de la santé mentale. <br />
             <br />
             La santé mentale est un enjeu majeur en France. Chaque année, une
             personne sur cinq est atteinte de troubles psychiatriques, et
-            pourtant, c’est un sujet considéré tabou par la majorité des français.
+            pourtant, c’est un sujet considéré tabou par la majorité des
+            français.
             <br />
             <br />
-            Nous sommes donc fiers de vous présenter <span className="cesizen-span">CESIZen</span>, une plateforme
+            Nous sommes donc fiers de vous présenter{" "}
+            <span className="cesizen-span">CESIZen</span>, une plateforme
             disponible à tous les français et proposant des exercices de
             méditation et des articles sur le bien être, dans le but d’améliorer
             le bien-être et la santé mentale des citoyens.

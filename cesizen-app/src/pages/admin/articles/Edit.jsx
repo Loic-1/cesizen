@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import ArticleGallery from '../../../components/articles/ArticleGallery.jsx'
-import RichTextEditor from '../../../components/forms/RichTextEditor.jsx'
 import { useAuth } from '../../../context/AuthContext.jsx'
 import { apiRequest } from '../../../lib/api.js'
 import { formatArticleDate, normalizeFiles } from '../../../lib/articles.js'
+
+const RichTextEditor = lazy(() => import('../../../components/forms/RichTextEditor.jsx'))
 
 const initialForm = {
   title: '',
@@ -237,13 +238,15 @@ export default function AdminEditArticlePage() {
             />
           </label>
 
-          <RichTextEditor
-            id="article-content-edit"
-            label="Contenu"
-            value={form.content}
-            onChange={(content) => setForm((current) => ({ ...current, content }))}
-            required
-          />
+          <Suspense fallback={<p className="form-helper">Chargement de l'editeur...</p>}>
+            <RichTextEditor
+              id="article-content-edit"
+              label="Contenu"
+              value={form.content}
+              onChange={(content) => setForm((current) => ({ ...current, content }))}
+              required
+            />
+          </Suspense>
 
           <label className="form-field">
             <span>Ajouter de nouvelles images (optionnel)</span>

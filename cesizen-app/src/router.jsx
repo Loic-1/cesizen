@@ -1,61 +1,48 @@
 import { createBrowserRouter } from 'react-router-dom'
-import AppLayout from './layouts/AppLayout.jsx'
-import HomePage from './pages/App.jsx'
-import ArticlesPage from './pages/articles/List.jsx'
-import ArticleDetailPage from './pages/articles/Detail.jsx'
-import LoginPage from './pages/auth/Login.jsx'
-import RegisterPage from './pages/auth/Register.jsx'
-import VerifyEmailPage from './pages/auth/VerifyEmail.jsx'
-import CardiacCoherencePage from './pages/wellness/CardiacCoherence.jsx'
-import NotFoundPage from './pages/errors/NotFound.jsx'
-import UnauthorizedPage from './pages/errors/Unauthorized.jsx'
-import AccountRoute from './routes/AccountRoute.jsx'
-import ProfilePage from './pages/account/Profile.jsx'
-import ChangePasswordPage from './pages/account/ChangePassword.jsx'
-import AdminRoute from './routes/AdminRoute.jsx'
-import AdminDashboardPage from './pages/admin/Dashboard.jsx'
-import AdminArticlesPage from './pages/admin/articles/List.jsx'
-import AdminCreateArticlePage from './pages/admin/articles/Create.jsx'
-import AdminEditArticlePage from './pages/admin/articles/Edit.jsx'
-import AdminFilesPage from './pages/admin/files/List.jsx'
-import AdminUsersPage from './pages/admin/users/List.jsx'
-import AdminUserDetailPage from './pages/admin/users/Detail.jsx'
+
+function lazyComponent(loader) {
+  return async () => {
+    const module = await loader()
+
+    return { Component: module.default }
+  }
+}
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <AppLayout />,
+    lazy: lazyComponent(() => import('./layouts/AppLayout.jsx')),
     children: [
-      { index: true, element: <HomePage /> },
-      { path: 'articles', element: <ArticlesPage /> },
-      { path: 'articles/:id', element: <ArticleDetailPage /> },
-      { path: 'login', element: <LoginPage /> },
-      { path: 'register', element: <RegisterPage /> },
-      { path: 'verify-email', element: <VerifyEmailPage /> },
-      { path: 'coherence-cardiaque', element: <CardiacCoherencePage /> },
-      { path: '401', element: <UnauthorizedPage /> },
+      { index: true, lazy: lazyComponent(() => import('./pages/App.jsx')) },
+      { path: 'articles', lazy: lazyComponent(() => import('./pages/articles/List.jsx')) },
+      { path: 'articles/:id', lazy: lazyComponent(() => import('./pages/articles/Detail.jsx')) },
+      { path: 'login', lazy: lazyComponent(() => import('./pages/auth/Login.jsx')) },
+      { path: 'register', lazy: lazyComponent(() => import('./pages/auth/Register.jsx')) },
+      { path: 'verify-email', lazy: lazyComponent(() => import('./pages/auth/VerifyEmail.jsx')) },
+      { path: 'coherence-cardiaque', lazy: lazyComponent(() => import('./pages/wellness/CardiacCoherence.jsx')) },
+      { path: '401', lazy: lazyComponent(() => import('./pages/errors/Unauthorized.jsx')) },
       {
         path: 'me',
-        element: <AccountRoute />,
+        lazy: lazyComponent(() => import('./routes/AccountRoute.jsx')),
         children: [
-          { index: true, element: <ProfilePage /> },
-          { path: 'password', element: <ChangePasswordPage /> },
+          { index: true, lazy: lazyComponent(() => import('./pages/account/Profile.jsx')) },
+          { path: 'password', lazy: lazyComponent(() => import('./pages/account/ChangePassword.jsx')) },
         ],
       },
       {
         path: 'admin',
-        element: <AdminRoute />,
+        lazy: lazyComponent(() => import('./routes/AdminRoute.jsx')),
         children: [
-          { index: true, element: <AdminDashboardPage /> },
-          { path: 'articles', element: <AdminArticlesPage /> },
-          { path: 'articles/new', element: <AdminCreateArticlePage /> },
-          { path: 'articles/:id', element: <AdminEditArticlePage /> },
-          { path: 'files', element: <AdminFilesPage /> },
-          { path: 'users', element: <AdminUsersPage /> },
-          { path: 'users/:id', element: <AdminUserDetailPage /> },
+          { index: true, lazy: lazyComponent(() => import('./pages/admin/Dashboard.jsx')) },
+          { path: 'articles', lazy: lazyComponent(() => import('./pages/admin/articles/List.jsx')) },
+          { path: 'articles/new', lazy: lazyComponent(() => import('./pages/admin/articles/Create.jsx')) },
+          { path: 'articles/:id', lazy: lazyComponent(() => import('./pages/admin/articles/Edit.jsx')) },
+          { path: 'files', lazy: lazyComponent(() => import('./pages/admin/files/List.jsx')) },
+          { path: 'users', lazy: lazyComponent(() => import('./pages/admin/users/List.jsx')) },
+          { path: 'users/:id', lazy: lazyComponent(() => import('./pages/admin/users/Detail.jsx')) },
         ],
       },
-      { path: '*', element: <NotFoundPage /> },
+      { path: '*', lazy: lazyComponent(() => import('./pages/errors/NotFound.jsx')) },
     ],
   },
 ])

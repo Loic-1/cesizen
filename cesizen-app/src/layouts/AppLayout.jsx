@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronUp } from 'lucide-react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 // import logoCesizen from '../assets/logo-cesizen.jpg'
 import logoCesizen from '../assets/logo-cesizen.png'
@@ -20,6 +19,25 @@ function HeaderLink({ to, children }) {
     >
       {children}
     </NavLink>
+  )
+}
+
+function ChevronIcon({ direction }) {
+  const path =
+    direction === 'up'
+      ? 'M6 15l6-6 6 6'
+      : 'M6 9l6 6 6-6'
+
+  return (
+    <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none">
+      <path
+        d={path}
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   )
 }
 
@@ -91,7 +109,7 @@ export default function AppLayout() {
                   onClick={() => setIsUserMenuOpen((current) => !current)}
                 >
                   <span className="user-menu__name">{user?.email ?? 'Mon compte'}</span>
-                  {isUserMenuOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  {isUserMenuOpen ? <ChevronIcon direction="up" /> : <ChevronIcon direction="down" />}
                 </button>
 
                 {isUserMenuOpen ? (

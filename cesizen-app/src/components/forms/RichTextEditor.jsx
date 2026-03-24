@@ -17,7 +17,7 @@ import 'tinymce/skins/content/default/content.min.css'
 
 export default function RichTextEditor({ id, label, value, onChange, required = false }) {
   return (
-    <label className="form-field">
+    <div className="form-field">
       <span>{label}</span>
       <div className="rich-text-editor">
         <Editor
@@ -29,6 +29,8 @@ export default function RichTextEditor({ id, label, value, onChange, required = 
             menubar: false,
             branding: false,
             height: 420,
+            skin: false,
+            content_css: false,
             plugins: ['advlist', 'autolink', 'lists', 'link', 'image', 'table', 'preview', 'wordcount', 'code'],
             toolbar:
               'undo redo | blocks | bold italic underline | forecolor | bullist numlist | link image table | alignleft aligncenter alignright | blockquote | removeformat | preview code',
@@ -38,11 +40,11 @@ export default function RichTextEditor({ id, label, value, onChange, required = 
             browser_spellcheck: true,
             contextmenu: false,
             promotion: false,
-            statusbar: true,
+            statusbar: false,
           }}
         />
       </div>
       {required ? <input type="hidden" value={value} required readOnly /> : null}
-    </label>
+    </div>
   )
 }

@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import RichTextEditor from '../../../components/forms/RichTextEditor.jsx'
 import { useAuth } from '../../../context/AuthContext.jsx'
+
+const RichTextEditor = lazy(() => import('../../../components/forms/RichTextEditor.jsx'))
 
 const initialForm = {
   title: '',
@@ -123,13 +124,15 @@ export default function AdminCreateArticlePage() {
             />
           </label>
 
-          <RichTextEditor
-            id="article-content-create"
-            label="Contenu"
-            value={form.content}
-            onChange={(content) => setForm((current) => ({ ...current, content }))}
-            required
-          />
+          <Suspense fallback={<p className="form-helper">Chargement de l'editeur...</p>}>
+            <RichTextEditor
+              id="article-content-create"
+              label="Contenu"
+              value={form.content}
+              onChange={(content) => setForm((current) => ({ ...current, content }))}
+              required
+            />
+          </Suspense>
 
           <label className="form-field">
             <span>Images de l'article (optionnel)</span>
