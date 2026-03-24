@@ -64,9 +64,9 @@ class Article
     private Uuid $id;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'articles')]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     #[Groups(['article:read'])]
-    private User $user;
+    private ?User $user = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['article:read'])]
@@ -120,12 +120,12 @@ class Article
         return $this->id;
     }
 
-    public function getUser(): User
+    public function getUser(): ?User
     {
         return $this->user;
     }
 
-    public function setUser(User $user): self
+    public function setUser(?User $user): self
     {
         $this->user = $user;
 

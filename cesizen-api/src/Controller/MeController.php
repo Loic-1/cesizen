@@ -7,6 +7,7 @@ use App\Dto\User\UpdateMeInput;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Service\EmailVerificationManager;
+use App\Service\ArticleAuthorDetachService;
 use App\Service\RequestPayloadResolver;
 use App\Service\VerificationEmailSender;
 use Doctrine\ORM\EntityManagerInterface;
@@ -35,6 +36,7 @@ class MeController extends AbstractController
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly EmailVerificationManager $emailVerificationManager,
         private readonly VerificationEmailSender $verificationEmailSender,
+        private readonly ArticleAuthorDetachService $articleAuthorDetachService,
         private readonly EntityManagerInterface $entityManager,
         private readonly string $frontendUrl,
     )
@@ -132,6 +134,7 @@ class MeController extends AbstractController
             return $this->json(['message' => 'Authentication required.'], Response::HTTP_UNAUTHORIZED);
         }
 
+        $this->articleAuthorDetachService->detachFromUser($user);
         $this->entityManager->remove($user);
         $this->entityManager->flush();
 

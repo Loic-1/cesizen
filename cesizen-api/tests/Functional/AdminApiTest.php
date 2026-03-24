@@ -46,6 +46,25 @@ class AdminApiTest extends ApiTestCase
         self::assertNull(static::getContainer()->get(UserRepository::class)->find($user->getId()));
     }
 
+    public function testDeletingUserKeepsArticlesAndClearsAuthor(): void
+    {
+        $admin = $this->createUser('admin@example.com', self::DEFAULT_PASSWORD, ['ROLE_ADMIN']);
+        $author = $this->createUser('author@example.com', self::DEFAULT_PASSWORD);
+        $article = $this->createArticle($author, 'Article conservé', 'Contenu', 'Description');
+
+        $this->client->request('DELETE', '/admin/users/'.$author->getId()->toRfc4122(), [], [], array_merge([
+            'HTTP_ACCEPT' => 'application/json',
+        ], $this->authHeaderFor($admin)));
+
+        self::assertResponseStatusCodeSame(Response::HTTP_NO_CONTENT);
+        self::assertNull(static::getContainer()->get(UserRepository::class)->find($author->getId()));
+
+        $this->entityManager->clear();
+        $reloadedArticle = static::getContainer()->get(ArticleRepository::class)->find($article->getId());
+        self::assertNotNull($reloadedArticle);
+        self::assertNull($reloadedArticle->getUser());
+    }
+
     public function testArticlesRoutesSupportPublicReadAndAdminWrite(): void
     {
         $admin = $this->createUser('admin@example.com', self::DEFAULT_PASSWORD, ['ROLE_ADMIN']);
