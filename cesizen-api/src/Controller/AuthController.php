@@ -279,6 +279,12 @@ class AuthController extends AbstractController
         ], $status, [], ['groups' => ['user:read']]), $refreshToken);
     }
 
+    /**
+     * Ajoute le cookie de rafraîchissement à la réponse.
+     * @param JsonResponse $response
+     * @param IssuedRefreshToken $refreshToken
+     * @return JsonResponse
+     */
     private function withRefreshCookie(JsonResponse $response, IssuedRefreshToken $refreshToken): JsonResponse
     {
         $response->headers->setCookie(
@@ -288,6 +294,11 @@ class AuthController extends AbstractController
         return $response;
     }
 
+    /**
+     * Envoie un e-mail de vérification à l'utilisateur avec un lien contenant un token de vérification.
+     * @param User $user
+     * @return void
+     */
     private function sendVerificationEmail(User $user): void
     {
         $verificationToken = $this->emailVerificationManager->create($user);
@@ -300,6 +311,12 @@ class AuthController extends AbstractController
         $this->verificationEmailSender->send($user, $verificationUrl);
     }
 
+    /**
+     * Construit une clé de cache unique pour suivre les tentatives de connexion en fonction de l'e-mail et de l'adresse IP du client.
+     * @param Request $request
+     * @param string $email
+     * @return string
+     */
     private function buildLoginAttemptCacheKey(Request $request, string $email): string
     {
         $normalizedEmail = mb_strtolower(trim($email));
@@ -309,6 +326,8 @@ class AuthController extends AbstractController
     }
 
     /**
+     * Récupère les données de tentative de connexion depuis le cache. Si aucune donnée n'est trouvée ou si elles sont invalides, retourne des valeurs par défaut.
+     * @param string $attemptKey
      * @return array{count: int, resetAt: int}
      */
     private function getLoginAttemptData(string $attemptKey): array
@@ -330,7 +349,10 @@ class AuthController extends AbstractController
     }
 
     /**
+     * Enregistre une tentative de connexion échouée en incrémentant le compteur et en définissant la date de réinitialisation si nécessaire. Si la fenêtre de temps est écoulée, réinitialise les données.
+     * @param string $attemptKey
      * @param array{count: int, resetAt: int} $attemptData
+     * @return void
      */
     private function recordFailedLoginAttempt(string $attemptKey, array $attemptData): void
     {
