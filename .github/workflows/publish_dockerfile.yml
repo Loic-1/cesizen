@@ -41,6 +41,5 @@ jobs:
           context: ./cesizen-app
           file: ./cesizen-app/Dockerfile
           push: true
-          platforms: linux/amd64,linux/arm64
           tags: |
             ghcr.io/loic-1/cesizen-api-app:latest
