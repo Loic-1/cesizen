@@ -15,8 +15,8 @@ cesizen-api/
 
 ### Technologies requises
 
-* Docker
-* Git
+* [Docker](https://www.docker.com/products/docker-desktop/) pour lancer le conteneur de l'application
+* [Git](https://git-scm.com/install/) (optionnel) pour faire la gestion des versions du code
 
 ### Cloner le repository
 
