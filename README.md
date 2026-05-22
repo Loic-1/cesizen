@@ -4,10 +4,14 @@
 
 ```text
 cesizen-api/
-  cesizen-api/  # Backend Symfony
-  cesizen-app/  # Frontend ReactJS
-  doc/          # Documentation
-  compose.yaml
+  .github/          # Jobs de tests et d'upload d'image Docker
+  cesizen-api/      # Backend Symfony
+  cesizen-app/      # Frontend ReactJS
+  doc/              # Documentation
+  .env.example      # Exemple contenu .env
+  compose.dev.yaml  # Compose environnement de développement
+  compose.prod.yaml # Compose environnement de production
+  compose.ps1       # Script d'exécution du compose
   README.md
 ```
 
@@ -30,16 +34,37 @@ cd cesizen-api
 
 ### Variables d'environnement
 
-Stockees dans les fichiers *.env*, *.env.test* et *.env.dev* du backend, dans `cesizen-api/`
+Faire une copie du fichier .env.example et le renommer .env.
 
 ### Lancement des containers Docker
 
-```bash
-# Lancement conteneur
-docker compose up -d --build
+Ce projet comprend deux packages d'image pour l'[API Symfony](https://github.com/Loic-1/cesizen-api/pkgs/container/cesizen-api-api) et l'[app VueJS](https://github.com/Loic-1/cesizen-api/pkgs/container/cesizen-api-app)
+À chaque push et PR, l'image est ré-uploadée avec le tag correspondant à la branche afin de rester à jour.
+
+Chaque package possède deux tags: **latest** pour l'image de production et **dev** pour l'image de développement.
+
+Avec Powershell
+```shell
+# Lancement conteneur en dev (choisit par défaut l'image de dev)
+./compose.ps1
+
+# OU
+.compose.ps1 dev
+
+# Lancement conteneur en prod
+./compose.ps1 prod
 ```
 
-Lance les conteneurs Cesizen, contenant les services suivants :
+Directement en CLI Docker
+```bash
+# Lancement conteneur en dev
+docker compose -f ./compose.dev.yaml up -d --build
+
+# Lancement conteneur en dev
+docker compose -f ./compose.prod.yaml up -d --build
+```
+
+Le conteneur Cesizen possède les services suivants :
 * app-1 : le frontend **React/Vite** sur `http://localhost:5173`
 * database-1 : **MariaDB**, SGBD relationnel pour le stockage des donnees
 * mailpit-1 : **Mailpit**, outil de test SMTP pour l'envoi des mails
