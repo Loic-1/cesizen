@@ -13,13 +13,13 @@ function Start-Compose
     if($env -eq "dev")
     {
         echo "Starting compose for dev environment"
-        docker compose -f ./compose.dev.yaml up -d --build
+        docker compose -f ./compose.base.yaml -f ./compose.dev.yaml up -d --build
     }
 
     if($env -eq "prod")
     {
         echo "Starting compose for prod environment"
-        docker compose -f ./compose.prod.yaml up -d --build
+        docker compose -f ./compose.base.yaml -f ./compose.prod.yaml up -d --build
     }
 }
 
