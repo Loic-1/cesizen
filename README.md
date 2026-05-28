@@ -24,7 +24,7 @@ cesizen-api/
 
 ### Cloner le repository
 
-```bash
+```console
 # Recupere le projet depuis le repository GitHub
 git clone https://github.com/Loic-1/cesizen-api
 
@@ -44,7 +44,7 @@ Ce projet comprend deux packages d'image pour l'[API Symfony](https://github.com
 Chaque package possède deux tags: **latest** pour l'image de production et **dev** pour l'image de développement.
 
 Avec Powershell
-```shell
+```console
 # Lancement conteneur en dev (choisit par défaut l'image de dev)
 ./compose.ps1
 
@@ -56,7 +56,7 @@ Avec Powershell
 ```
 
 Directement en CLI Docker
-```bash
+```console
 # Lancement conteneur en dev
 docker compose -f ./compose.dev.yaml up -d --build
 
