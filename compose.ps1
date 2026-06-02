@@ -20,7 +20,7 @@ function Start-Compose
     {
         echo "Starting compose for prod environment"
         docker compose -f ./compose.base.yaml -f ./compose.prod.yaml pull
-        docker compose -f ./compose.base.yaml -f ./compose.prod.yaml up -d
+        docker compose -f ./compose.base.yaml -f ./compose.prod.yaml up -d --remove-orphans
     }
 }
 

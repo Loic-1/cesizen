@@ -19,8 +19,8 @@ services:
     depends_on:
       database:
         condition: service_healthy
-      mailpit:
-        condition: service_started
+      # mailpit:
+      #   condition: service_started
     environment:
       APP_ENV: ${APP_ENV}
       APP_DEBUG: ${APP_DEBUG}
