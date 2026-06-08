@@ -3,7 +3,7 @@
 ## Structure du projet
 
 ```text
-cesizen-api/
+cesizen/
   .github/          # Jobs de tests et d'upload d'image Docker
   cesizen-api/      # Backend Symfony
   cesizen-app/      # Frontend ReactJS
@@ -26,10 +26,10 @@ cesizen-api/
 
 ```console
 # Recupere le projet depuis le repository GitHub
-git clone https://github.com/Loic-1/cesizen-api
+git clone https://github.com/Loic-1/cesizen
 
 # Pour rentrer dans le dossier du projet
-cd cesizen-api
+cd cesizen
 ```
 
 ### Variables d'environnement
@@ -38,7 +38,7 @@ Faire une copie du fichier .env.example et le renommer .env.
 
 ### Lancement des containers Docker
 
-Ce projet comprend deux packages d'image pour l'[API Symfony](https://github.com/Loic-1/cesizen-api/pkgs/container/cesizen-api-api) et l'[app VueJS](https://github.com/Loic-1/cesizen-api/pkgs/container/cesizen-api-app)
+Ce projet comprend deux packages d'image pour l'[API Symfony](https://github.com/Loic-1/cesizen/pkgs/container/cesizen-api) et l'[app ReactJS](https://github.com/Loic-1/cesizen/pkgs/container/cesizen-app)
 À chaque push et PR, l'image est ré-uploadée avec le tag correspondant à la branche afin de rester à jour.
 
 Chaque package possède deux tags: **latest** pour l'image de production et **dev** pour l'image de développement.
@@ -79,4 +79,4 @@ Le conteneur Cesizen possède les services suivants :
 
 [http://localhost:8025](http://localhost:8025) &rarr; Interface web **Mailpit**
 
-[Collection Postman](https://github.com/Loic-1/cesizen-api/blob/main/doc/cesizen-api.postman_collection.json) &rarr; Pour tester les endpoints
+[Collection Postman](https://github.com/Loic-1/cesizen/blob/main/doc/cesizen-api.postman_collection.json) &rarr; Pour tester les endpoints

@@ -1,8 +1,8 @@
-name: cesizen-api
+name: cesizen
 
 services:
   app:
-    image: ghcr.io/loic-1/cesizen-api-app:dev
+    image: ghcr.io/loic-1/cesizen-app:dev
     ports:
       - "5173:5173"
     volumes:
@@ -15,7 +15,7 @@ services:
 
   # Lance le conteneur d'API Symfony
   api:
-    image: ghcr.io/loic-1/cesizen-api-api:dev
+    image: ghcr.io/loic-1/cesizen-api:dev
     depends_on:
       database:
         condition: service_healthy
