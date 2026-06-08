@@ -1,4 +1,4 @@
-name: cesizen-api
+name: cesizen
 
 services:
   # Lance le conteneur de base de données MariaDB

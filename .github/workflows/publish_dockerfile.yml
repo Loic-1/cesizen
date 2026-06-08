@@ -1,4 +1,4 @@
-name: Publication of App and API Dockeerfiles
+name: Publication of App and API Dockerfiles
 
 on:
   push:
@@ -25,7 +25,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build & push API (main)
+      - name: Build & push API Dockerfile to registry (main)
         if: github.ref == 'refs/heads/main'
         uses: docker/build-push-action@v7
         with:
@@ -33,9 +33,9 @@ jobs:
           file: ./cesizen-api/Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/loic-1/cesizen-api-api:latest
+          tags: ghcr.io/loic-1/cesizen-api:latest
 
-      - name: Build & push API (dev)
+      - name: Build & push API Dockerfile to registry (dev)
         if: github.ref == 'refs/heads/dev'
         uses: docker/build-push-action@v7
         with:
@@ -43,7 +43,7 @@ jobs:
           file: ./cesizen-api/Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/loic-1/cesizen-api-api:dev
+          tags: ghcr.io/loic-1/cesizen-api:dev
 
       - name: Build & push App Dockerfile to registry (main)
         if: github.ref == 'refs/heads/main'
@@ -53,7 +53,7 @@ jobs:
           file: ./cesizen-app/Dockerfile
           push: true
           tags: |
-            ghcr.io/loic-1/cesizen-api-app:latest
+            ghcr.io/loic-1/cesizen-app:latest
 
       - name: Build & push App Dockerfile to registry (dev)
         if: github.ref == 'refs/heads/dev'
@@ -63,4 +63,4 @@ jobs:
           file: ./cesizen-app/Dockerfile
           push: true
           tags: |
-            ghcr.io/loic-1/cesizen-api-app:dev
+            ghcr.io/loic-1/cesizen-app:dev

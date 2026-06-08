@@ -1,4 +1,4 @@
-name: Cesizen API Coverage
+name: Cesizen Backend Coverage
 
 on:
   pull_request:
