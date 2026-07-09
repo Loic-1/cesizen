@@ -4,14 +4,15 @@
 
 ```text
 cesizen/
-  .github/          # Jobs de tests et d'upload d'image Docker
-  cesizen-api/      # Backend Symfony
-  cesizen-app/      # Frontend ReactJS
-  doc/              # Documentation
-  .env.example      # Exemple contenu .env
-  compose.dev.yaml  # Compose environnement de développement
-  compose.prod.yaml # Compose environnement de production
-  compose.ps1       # Script d'exécution du compose
+  .github/             # Jobs de tests et d'upload d'image Docker
+  cesizen-api/         # Backend Symfony
+  cesizen-app/         # Frontend ReactJS
+  doc/                 # Documentation
+  .env.example         # Exemple contenu .env
+  compose.base.yaml    # Compose avec les sercices partagés par les environnements
+  compose.dev.yaml     # Compose environnement de développement
+  compose.prod.yaml    # Compose environnement de production
+  compose.ps1          # Script d'exécution du compose
   README.md
 ```
 
