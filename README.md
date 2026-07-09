@@ -44,6 +44,8 @@ Ce projet comprend deux packages d'image pour l'[`API Symfony`](https://github.c
 
 Chaque package possède deux tags: **latest** pour l'image de production et **dev** pour l'image de développement.
 
+## Lancement en local
+
 Avec Powershell
 ```console
 # Lancement conteneur en dev (choisit par défaut l'image de dev)
@@ -72,7 +74,7 @@ Le conteneur Cesizen possède les services suivants :
 * `phpmyadmin-1` : **PHPMyAdmin**, interface web d'administration de la base de donnees
 * `api-1` : l'**api**, le backend de Cesizen
 
-### Liens utiles
+### Liens utiles (local)
 
 [`http://localhost:5173`](http://localhost:5173) &rarr; Application web **ReactJS**
 
@@ -81,3 +83,7 @@ Le conteneur Cesizen possède les services suivants :
 [`http://localhost:8025`](http://localhost:8025) &rarr; Interface web **Mailpit**
 
 [`Collection Postman`](https://github.com/Loic-1/cesizen/blob/main/doc/cesizen-api.postman_collection.json) &rarr; Pour tester les endpoints
+
+### Lien production CESIZen
+
+[`CESIZen production`](https://youtube.com/) &rarr; Lien vers la production du projet
