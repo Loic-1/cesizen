@@ -32,5 +32,5 @@ jobs:
           password: ${{ secrets.VM_PASSWORD }}
           port: ${{ secrets.VM_PORT || 22 }}
           script: |
-            docker compose -f ./compose.base.yaml -f ./compose.prod.yaml pull
-            docker compose -f ./compose.base.yaml -f ./compose.prod.yaml up -d --remove-orphans
+            docker-compose -f ./compose.base.yaml -f ./compose.prod.yaml pull
+            docker-compose -f ./compose.base.yaml -f ./compose.prod.yaml up -d --remove-orphans
