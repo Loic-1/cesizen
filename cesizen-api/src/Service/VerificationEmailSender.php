@@ -44,7 +44,10 @@ class VerificationEmailSender
 
         $sent = mail($user->getEmail(), $subject, $body, implode("\r\n", $headers));
         if ($sent === false) {
-            throw new \RuntimeException('Unable to send verification email.');
+            error_log(sprintf(
+                'Unable to send verification email to %s.',
+                $user->getEmail()
+            ));
         }
     }
 
