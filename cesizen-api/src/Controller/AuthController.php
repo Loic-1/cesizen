@@ -82,7 +82,7 @@ class AuthController extends AbstractController
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
-        $this->sendVerificationEmail($user);
+        $this->sendVerificationEmail($user, $request);
 
         return $this->json([
             'message' => 'Registration successful. Please verify your email address.',
@@ -165,7 +165,7 @@ class AuthController extends AbstractController
 
         $user = $this->userRepository->findOneByEmail((string) $input->email);
         if ($user !== null && !$user->isVerified()) {
-            $this->sendVerificationEmail($user);
+            $this->sendVerificationEmail($user, $request);
         }
 
         return $this->json([
@@ -299,16 +299,32 @@ class AuthController extends AbstractController
      * @param User $user
      * @return void
      */
-    private function sendVerificationEmail(User $user): void
+    private function sendVerificationEmail(User $user, Request $request): void
     {
         $verificationToken = $this->emailVerificationManager->create($user);
+        $frontendUrl = $this->resolveFrontendUrl($request);
         $verificationUrl = sprintf(
             '%s/verify-email?token=%s',
-            rtrim($this->frontendUrl, '/'),
+            rtrim($frontendUrl, '/'),
             urlencode($verificationToken->plainToken)
         );
 
         $this->verificationEmailSender->send($user, $verificationUrl);
+    }
+
+    private function resolveFrontendUrl(Request $request): string
+    {
+        $origin = $request->headers->get('origin') ?? $request->headers->get('referer');
+        if (is_string($origin) && $origin !== '') {
+            $parts = parse_url($origin);
+            if (is_array($parts) && isset($parts['scheme'], $parts['host'])) {
+                $port = isset($parts['port']) ? ':'.$parts['port'] : '';
+
+                return $parts['scheme'].'://'.$parts['host'].$port;
+            }
+        }
+
+        return $this->frontendUrl;
     }
 
     /**
