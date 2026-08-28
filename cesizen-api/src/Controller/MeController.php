@@ -85,7 +85,7 @@ class MeController extends AbstractController
             }
 
             $user->setEmail($input->email)->setIsVerified(false);
-            $this->sendVerificationEmail($user);
+            $this->sendVerificationEmail($user, $request);
         }
 
         $this->entityManager->flush();
@@ -141,15 +141,31 @@ class MeController extends AbstractController
         return $this->json(null, Response::HTTP_NO_CONTENT);
     }
 
-    private function sendVerificationEmail(User $user): void
+    private function sendVerificationEmail(User $user, Request $request): void
     {
         $verificationToken = $this->emailVerificationManager->create($user);
+        $frontendUrl = $this->resolveFrontendUrl($request);
         $verificationUrl = sprintf(
             '%s/verify-email?token=%s',
-            rtrim($this->frontendUrl, '/'),
+            rtrim($frontendUrl, '/'),
             urlencode($verificationToken->plainToken)
         );
 
         $this->verificationEmailSender->send($user, $verificationUrl);
+    }
+
+    private function resolveFrontendUrl(Request $request): string
+    {
+        $origin = $request->headers->get('origin') ?? $request->headers->get('referer');
+        if (is_string($origin) && $origin !== '') {
+            $parts = parse_url($origin);
+            if (is_array($parts) && isset($parts['scheme'], $parts['host'])) {
+                $port = isset($parts['port']) ? ':'.$parts['port'] : '';
+
+                return $parts['scheme'].'://'.$parts['host'].$port;
+            }
+        }
+
+        return $this->frontendUrl;
     }
 }
