@@ -36,6 +36,11 @@ from ${MAILER_FROM_EMAIL:-no-reply@cesizen.local}
 EOF
 chmod 644 /etc/msmtprc
 
+echo "Preparing upload directory..."
+UPLOAD_DIR="${UPLOAD_DIR:-/var/www/html/public/uploads/articles}"
+mkdir -p "$UPLOAD_DIR"
+chown -R www-data:www-data "$(dirname "$UPLOAD_DIR")"
+
 echo "Running database migrations..."
 php bin/console doctrine:migrations:migrate --no-interaction
 

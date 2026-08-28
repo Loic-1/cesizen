@@ -37,6 +37,9 @@ services:
       MAILER_FROM_EMAIL: ${MAILER_FROM_EMAIL}
       SMTP_HOST: ${SMTP_HOST}
       SMTP_PORT: ${SMTP_PORT}
+      UPLOAD_DIR: /var/www/html/public/uploads/articles
+    volumes:
+      - ./storage/uploads/articles:/var/www/html/public/uploads/articles
     ports:
       - "8000:80"
     restart: unless-stopped

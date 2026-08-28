@@ -6,6 +6,7 @@
 /cesizen-api/config/secrets/prod/prod.decrypt.private.php
 /cesizen-api/public/bundles/
 /cesizen-api/var/
+/storage/
 
 ### Dependencies
 /cesizen-api/vendor/
